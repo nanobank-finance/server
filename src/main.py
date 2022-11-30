@@ -5,8 +5,8 @@ import schemas
 app = FastAPI()
 
 
-@app.get("/")
-async def read_root():
+@app.get("/login")
+async def login(username: str, password: str):
     return {"Hello": "World"}
 
 

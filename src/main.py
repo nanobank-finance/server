@@ -6,7 +6,7 @@ app = FastAPI()
 
 
 @app.get("/login")
-async def login(username: str, password: str):
+async def login(username: str, password: str) -> bool:
     return {"Hello": "World"}
 
 

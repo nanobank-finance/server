@@ -1,9 +1,11 @@
 from typing import Union
 from fastapi import FastAPI
 import schemas
+import firebase_admin
+from firebase_admin import firestore
 
+db = firestore.client()
 app = FastAPI()
-
 
 @app.get("/")
 async def read_root():

@@ -6,11 +6,14 @@ import firebase_admin
 from firebase_admin import firestore, auth, credentials, initialize_app
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response
+from dotenv import load_dotenv
+from pathlib import Path
+import os
 
-
-db = firestore.client()
 app = FastAPI()
-
+load_dotenv(Path(os.environ['SECRETS_PATH']+"/.env.nanobank"))
+initialize_app(credentials.Certificate(os.environ['FIREBASE_CREDENTIALS_PATH']))
+db = firestore.client()
 loan_ref = db.collection(u'loan')
 
 """ loan application create/read/update/delete endpoints """

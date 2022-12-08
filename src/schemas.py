@@ -1,6 +1,10 @@
-from typing import Union
+from typing import Union, TypeVar, Generic
 from pydantic import BaseModel
 from enum import Enum
+
+T = TypeVar('T')
+
+""" api request/response models """
 
 class CheckType(Enum):
     CREDIT_CHECK: 1
@@ -11,6 +15,18 @@ class CheckType(Enum):
 class SuccessOrFailResponse(BaseModel):
     success: bool
     error_message: Union[str, None] = None
+    error_code: Union[int, None] = None
+
+class WalletModel(BaseModel):
+    name: str
+
+class SavingsInterestModel(BaseModel):
+    name: str
+
+class LoanApplicationModel(BaseModel):
+    name: str
+
+""" database models """
 
 class Wallet(object):
     def __init__(self):
@@ -21,7 +37,8 @@ class SavingsInterest(object):
         pass
 
 class LoanApplication(object):
-    def __init__(self, name, state, country, capital=False, population=0, regions=[]):
+    def __init__(self, name, state, country, capital=False, population=0,
+                 regions=[]):
         self.name = name
         self.state = state
         self.country = country
@@ -31,9 +48,11 @@ class LoanApplication(object):
 
     @staticmethod
     def from_dict(source):
+        # ...
         pass
 
     def to_dict(self):
+        # ...
         pass
 
     def __repr__(self):

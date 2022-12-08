@@ -12,6 +12,7 @@ import os
 
 app = FastAPI()
 load_dotenv(Path(os.environ['SECRETS_PATH']+"/.env.nanobank"))
+config = utils.get_config()
 initialize_app(credentials.Certificate(os.environ['FIREBASE_CREDENTIALS_PATH']))
 db = firestore.client()
 loan_ref = db.collection(u'loan')

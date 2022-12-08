@@ -1,6 +1,12 @@
 from firebase_admin import firestore, auth, credentials, initialize_app
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response
+from const import FIREBASE_PROJECT_ID
+from google.oauth2 import service_account
+from google.auth.transport.requests import AuthorizedSession
+import json
+import os
+import re
 
 def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depends(HTTPBearer(auto_error=False))):
     if credential is None:
@@ -19,3 +25,26 @@ def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depen
         )
     res.headers['WWW-Authenticate'] = 'Bearer realm="auth_required"'
     return decoded_token
+
+def get_config():
+    scopes = [
+        "https://www.googleapis.com/auth/firebase.remoteconfig"
+    ]
+
+    # Authenticate a credential with the service account
+    credentials = service_account.Credentials.from_service_account_file(
+        os.environ['FIREBASE_CREDENTIALS_PATH'], scopes=scopes)
+
+    authed_session = AuthorizedSession(credentials)
+    # https://firebase.google.com/docs/reference/remote-config/rest/v1/projects/getRemoteConfig
+    url = f"https://firebaseremoteconfig.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/remoteConfig"
+    response = authed_session.get(url)
+    response = json.loads(response.content.decode('utf-8'))
+    response = response.get("parameters")
+
+    feature_flags = []
+    for flag in response.keys():
+        if response.get(flag).get('valueType') == 'BOOLEAN':
+            default_value = bool(response.get(flag).get('defaultValue').get('value'))
+
+    print(response)

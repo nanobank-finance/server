@@ -77,11 +77,11 @@ async def get_checking_wallet(user = Depends(utils.get_user_token)):
 async def get_bill_pay_wallet(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
-@app.get("/withdaw/savings", response_model=schemas.SuccessOrFailResponse)
+@app.get("/withdraw/savings", response_model=schemas.SuccessOrFailResponse)
 async def withdraw_from_savings(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
-@app.get("/withdaw/checking", response_model=schemas.SuccessOrFailResponse)
+@app.get("/withdraw/checking", response_model=schemas.SuccessOrFailResponse)
 async def withdraw_from_checking(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 

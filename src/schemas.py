@@ -26,6 +26,9 @@ class SavingsInterestModel(BaseModel):
 class LoanApplicationModel(BaseModel):
     name: str
 
+class TokenResponse(BaseModel):
+    token: str
+
 """ database models """
 
 class Wallet(object):

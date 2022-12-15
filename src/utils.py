@@ -16,6 +16,7 @@ def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depen
             headers={'WWW-Authenticate': 'Bearer realm="auth_required"'},
         )
     try:
+        # todo: if we are in the emmulator environment, then don't check the token validity
         decoded_token = auth.verify_id_token(credential.credentials)
     except Exception as err:
         raise HTTPException(
@@ -23,6 +24,7 @@ def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depen
             detail=f"Invalid authentication from Firebase. {err}",
             headers={'WWW-Authenticate': 'Bearer error="invalid_token"'},
         )
+
     res.headers['WWW-Authenticate'] = 'Bearer realm="auth_required"'
     return decoded_token
 

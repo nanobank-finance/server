@@ -12,6 +12,7 @@ import schemas
 import utils
 import sumsub
 
+# server setup
 app = FastAPI()
 
 origins = [
@@ -29,20 +30,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# firebase auth credentials
 load_dotenv(Path(os.environ['SECRETS_PATH']+"/.env.nanobank"))
-config = utils.get_config()
-initialize_app(credentials.Certificate(os.environ['FIREBASE_CREDENTIALS_PATH']))
+initialize_app(credential=credentials.Certificate(os.environ['FIREBASE_CREDENTIALS_PATH']))
+
+# database
 db = firestore.client()
 loan_ref = db.collection(u'loan')
+
+# feature store config
+config = utils.get_config()
 
 """ sumsub token for kyc and verification """
 @app.get("/sumsub", response_model=schemas.TokenResponse)
 async def get_sumsub_token(user = Depends(utils.get_user_token)):
-    applicant_id = sumsub.create_applicant(user['uid'], 'basic-kyc-level')
-    image_id = sumsub.add_document(applicant_id)
-    status = sumsub.get_applicant_status(applicant_id)
-    token = sumsub.get_access_token(user['uid'], 'basic-kyc-level')
-    return token
+    # applicant_id = sumsub.create_applicant(user['uid'], 'basic-kyc-level')
+    # image_id = sumsub.add_document(applicant_id)
+    # status = sumsub.get_applicant_status(applicant_id)
+    # token = sumsub.get_access_token(user['uid'], 'basic-kyc-level')
+    return 'success'
 
 """ loan application create/read/update/delete endpoints """
 

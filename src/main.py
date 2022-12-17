@@ -41,25 +41,31 @@ loan_ref = db.collection(u'loan')
 # feature store config
 config = utils.get_config()
 
+# WIP
 """ sumsub token for kyc and verification """
 @app.get("/sumsub", response_model=schemas.TokenResponse)
 async def get_sumsub_token(user = Depends(utils.get_user_token)):
-    # applicant_id = sumsub.create_applicant(user['uid'], 'basic-kyc-level')
-    # image_id = sumsub.add_document(applicant_id)
-    # status = sumsub.get_applicant_status(applicant_id)
-    # token = sumsub.get_access_token(user['uid'], 'basic-kyc-level')
-    return 'success'
+    applicant_id = sumsub.create_applicant(user['uid'], 'basic-kyc-level')
+    image_id = sumsub.add_document(applicant_id)
+    status = sumsub.get_applicant_status(applicant_id)
+    token = sumsub.get_access_token(user['uid'], 'basic-kyc-level')
+    return {
+        "token": token
+    }
 
 """ loan application create/read/update/delete endpoints """
 
+# TODO
 @app.post("/loan", response_model=schemas.SuccessOrFailResponse)
 async def submit_loan_application(application: schemas.LoanApplicationModel, user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
+# TODO
 @app.get("/loans", response_model=List[schemas.LoanApplicationModel])
 async def get_loan_list(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
+# WIP
 @app.get("/loan/{loan_id}", response_model=Union[schemas.LoanApplicationModel, schemas.SuccessOrFailResponse])
 async def get_loan_details(loan_id: int, user = Depends(utils.get_user_token)):
     # TODO: check if user owns the loan?
@@ -69,59 +75,103 @@ async def get_loan_details(loan_id: int, user = Depends(utils.get_user_token)):
     
     return { "status": {"success": False, "error_code": 404, "error_message": "loan not found"} }
 
-
+# TODO
 @app.put("/loan/{loan_id}", response_model=schemas.SuccessOrFailResponse)
 async def update_loan_application(application: schemas.LoanApplicationModel, user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
+# TODO
 @app.delete("/loan/{loan_id}", response_model=schemas.SuccessOrFailResponse)
 async def withdraw_loan_application(loan_id: int, user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
 """ public loans endpoint for anonymized data """
 
+# TODO
 @app.get("/loans", response_model=List[schemas.LoanApplicationModel])
 async def get_public_loans():
     return {"Hello": "World"}
 
 """ run various types of background checks as part of the application process """
 
+# TODO
 @app.get("/check/{type}", response_model=schemas.SuccessOrFailResponse)
 async def start_user_kyc(type: schemas.CheckType, user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
 """ savings account endpoints """
 
-@app.get("/wallet/savings", response_model=schemas.WalletModel)
-async def get_savings_wallet(user = Depends(utils.get_user_token)):
-    return {"Hello": "World"}
+# WIP
+@app.get("/wallets", response_model=List[schemas.WalletModel])
+async def get_savings_wallet(): #user = Depends(utils.get_user_token)):
+    return [
+        {
+            "name": "wallet 1",
+            "address": "address 123",
+            "type": schemas.WalletType.PERSONAL,
+            "is_frozen": False
+        },
+        {
+            "name": "wallet 2",
+            "address": "address 123",
+            "type": schemas.WalletType.PERSONAL,
+            "is_frozen": False
+        },
+        {
+            "name": "wallet 3",
+            "address": "address 123",
+            "type": schemas.WalletType.PERSONAL,
+            "is_frozen": True,
+            "frozen_reason": "pending stake for loan 12345",
+            "frozen_reason_code": 102
+        },
+        {
+            "name": "payment for loan 123141",
+            "address": "address 123",
+            "type": schemas.WalletType.PAYMENT,
+            "is_frozen": False
+        },
+        {
+            "name": "yield from loan 12354",
+            "address": "address 123",
+            "type": schemas.WalletType.YIELD,
+            "is_frozen": False
+        },
+    ]
 
+# TODO
 @app.get("/savings/interest", response_model=schemas.SavingsInterestModel)
 async def get_interest_payment_history(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
 """ other wallet/payment related endpoints """
 
+# TODO
 @app.get("/wallet/checking", response_model=schemas.WalletModel)
 async def get_checking_wallet(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
+# TODO
 @app.get("/wallet/payment", response_model=schemas.WalletModel)
 async def get_bill_pay_wallet(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
+# TODO
 @app.get("/withdraw/savings", response_model=schemas.SuccessOrFailResponse)
 async def withdraw_from_savings(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
+# TODO
 @app.get("/withdraw/checking", response_model=schemas.SuccessOrFailResponse)
 async def withdraw_from_checking(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
+# TODO
 @app.get("/transfer/savings", response_model=schemas.SuccessOrFailResponse)
 async def transfer_from_savings_to_checking(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}
 
+# TODO
 @app.get("/transfer/checking", response_model=schemas.SuccessOrFailResponse)
 async def transfer_from_checking_to_savings(user = Depends(utils.get_user_token)):
     return {"Hello": "World"}

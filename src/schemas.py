@@ -7,10 +7,15 @@ T = TypeVar('T')
 """ api request/response models """
 
 class CheckType(Enum):
-    CREDIT_CHECK: 1
-    PROOF_OF_INCOME_CHECK: 2
-    BACKGROUND_CHECK: 3
-    IDENTITY_VERIFICATION_CHECK: 4
+    CREDIT_CHECK = 1
+    PROOF_OF_INCOME_CHECK = 2
+    BACKGROUND_CHECK = 3
+    IDENTITY_VERIFICATION_CHECK = 4
+
+class WalletType(Enum):
+    PERSONAL = 1
+    PAYMENT = 2
+    YIELD = 3
 
 class SuccessOrFailResponse(BaseModel):
     success: bool
@@ -19,12 +24,20 @@ class SuccessOrFailResponse(BaseModel):
 
 class WalletModel(BaseModel):
     name: str
+    address: str
+    type: WalletType
+    is_frozen: bool
+    frozen_reason: Union[str, None]
+    frozen_reason_code: Union[int, None]
 
 class SavingsInterestModel(BaseModel):
     name: str
 
 class LoanApplicationModel(BaseModel):
     name: str
+
+class TokenResponse(BaseModel):
+    token: str
 
 """ database models """
 

@@ -1,4 +1,5 @@
 from firebase_admin import firestore, auth, credentials, initialize_app
+# from firebase.auth import # todo: start auth emulator properly on the server side
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response
 from const import FIREBASE_PROJECT_ID
@@ -8,7 +9,9 @@ import json
 import os
 import re
 
-def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depends(HTTPBearer(auto_error=False))):
+def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depends(
+            HTTPBearer(auto_error=False)
+        )):
     if credential is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -16,13 +19,19 @@ def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depen
             headers={'WWW-Authenticate': 'Bearer realm="auth_required"'},
         )
     try:
-        decoded_token = auth.verify_id_token(credential.credentials)
+        if os.environ['NODE_ENV'] == 'development':
+            # ??????
+            auth.useEmulator("http://localhost:9099")
+            decoded_token = auth.verify_id_token(credential.credentials)
+        else:
+            decoded_token = auth.verify_id_token(credential.credentials)
     except Exception as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid authentication from Firebase. {err}",
             headers={'WWW-Authenticate': 'Bearer error="invalid_token"'},
         )
+
     res.headers['WWW-Authenticate'] = 'Bearer realm="auth_required"'
     return decoded_token
 

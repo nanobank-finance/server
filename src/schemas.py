@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Union
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, fields
 from random import random
 
 """ Enums """
@@ -38,6 +38,13 @@ class LoanPaymentState(Enum):
 
 """ Object Status Classes (for tracking entity workflows) """
 
+def post_init(self: object):
+    # convert objects to the dataclass type definition
+    for field in fields(self):
+        value = getattr(self, field.name)
+        if not isinstance(value, field.type):
+            raise setattr(self, field.name, field.type(value))
+
 @dataclass
 class WalletStatus:
     state: WalletState
@@ -46,6 +53,9 @@ class WalletStatus:
     previous: Union[WalletStatus, None]
     timestamp: datetime
     doc_id: str = random()
+
+    def __post_init__(self):
+        post_init(self)
  
 @dataclass
 class LoanPaymentStatus:
@@ -55,6 +65,9 @@ class LoanPaymentStatus:
     timestamp: datetime
     doc_id: str = random()
 
+    def __post_init__(self):
+        post_init(self)
+
 @dataclass   
 class LoanApplicationStatus:
     state: LoanApplicationState
@@ -63,11 +76,17 @@ class LoanApplicationStatus:
     timestamp: datetime
     doc_id: str = random()
 
+    def __post_init__(self):
+        post_init(self)
+
 """ Entities """
 
 @dataclass
 class User:
     uid: str
+
+    def __post_init__(self):
+        post_init(self)
 
 @dataclass   
 class Wallet:
@@ -77,6 +96,9 @@ class Wallet:
     key: Union[str, None]
     status: WalletStatus
     doc_id: float = random()
+
+    def __post_init__(self):
+        post_init(self)
 
 @dataclass
 class Loan:
@@ -90,6 +112,9 @@ class Loan:
     principal_wallet: Wallet
     borrower: User
     doc_id: float = random()
+
+    def __post_init__(self):
+        post_init(self)
     
 @dataclass
 class Stake:
@@ -102,6 +127,9 @@ class Stake:
     number_of_payment_periods: float
     doc_id: float = random()
 
+    def __post_init__(self):
+        post_init(self)
+
 @dataclass
 class LoanPayment:
     loan: Loan
@@ -109,3 +137,6 @@ class LoanPayment:
     amount_due_in_xno: float
     status: LoanPaymentStatus
     doc_id: float = random()
+
+    def __post_init__(self):
+        post_init(self)

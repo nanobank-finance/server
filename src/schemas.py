@@ -1,6 +1,7 @@
 from typing import Union
 from datetime import datetime
 from enum import Enum
+from pydantic import BaseModel
 from random import random
 
 class LoanApplicationState(Enum):
@@ -26,7 +27,16 @@ class LoanPaymentState(Enum):
     COMPLETED_LATE = 5
     MISSED = 6
 
-class WalletStatus(object):
+class User(BaseModel):
+    def __init__(self, uid):
+        self.uid: str = uid
+        
+    def to_dict(self):
+        return {
+            "uid": self.uid
+        }
+
+class WalletStatus(BaseModel):
 
     reasons = {
         101: "missing_user_verification",
@@ -46,8 +56,10 @@ class WalletStatus(object):
             "frozen_reason_code": self.frozen_reason_code,
             "frozen_reason_message": self.reasons.get(self.frozen_reason_code)
         }
+    
 
-class LoanApplicationStatus(object):
+
+class LoanApplicationStatus(BaseModel):
     def __init__(self, state, next, previous, timestamp):
         self.doc_id: str = random()
         self.state: LoanApplicationState = state
@@ -64,7 +76,7 @@ class LoanApplicationStatus(object):
             "timestamp": self.timestamp
         }
 
-class LoanPaymentStatus(object):
+class LoanPaymentStatus(BaseModel):
     def __init__(self, state, next, previous, timestamp):
         self.doc_id: str = random(),
         self.state: LoanPaymentState = state
@@ -81,33 +93,42 @@ class LoanPaymentStatus(object):
             "timestamp": self.timestamp
         }
 
-class Wallet(object):
-    def __init__(self, wallet_type, address, key, wallet_status):
-        self.doc_id: str = random()
-        self.wallet_type: WalletType = wallet_type
-        self.address: str = address
-        self.key: str = key
-        self.status: WalletStatus = wallet_status
+class Wallet(BaseModel):
+    doc_id: str
+    owner: User
+    wallet_type: WalletType
+    address: str
+    key: str
+    status: WalletStatus
+
+    def __init__(self, owner, wallet_type, address, key, wallet_status):
+        self.doc_id = random()
+        self.owner = owner
+        self.wallet_type = wallet_type
+        self.address = address
+        self.key = key
+        self.status = wallet_status
         
     def to_dict(self):
         # do not return key in responses
         return {
             "doc_id": self.doc_id,
+            "owner": self.owner,
             "wallet_type": self.wallet_type,
             "address": self.address,
             "status": self.status
         }
+    
+    @staticmethod
+    def from_dict(data):
+        return Wallet(
+            data.get('owner'),
+            data.get('wallet_type'),
+            data.get('address'),
+            data.get('key'),
+            data.get('status'))
 
-class User(object):
-    def __init__(self, uid):
-        self.uid: str = uid
-        
-    def to_dict(self):
-        return {
-            "uid": self.uid
-        }
-
-class Loan(object):
+class Loan(BaseModel):
     def __init__(
             self,
             principal_in_xno,
@@ -144,7 +165,7 @@ class Loan(object):
             "borrower": self.borrower
         }
 
-class Stake(object):
+class Stake(BaseModel):
     def __init__(
             self,
             owner,
@@ -175,7 +196,7 @@ class Stake(object):
             "number_of_payment_periods": self.number_of_payment_periods
         }
 
-class LoanPayment(object):
+class LoanPayment(BaseModel):
     def __init__(self, loan, due_date, amount_due_in_xno, status):
         self.doc_id: str = random()
         self.loan: Loan = loan

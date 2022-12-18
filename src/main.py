@@ -6,6 +6,8 @@ from firebase_admin import firestore, auth, credentials, initialize_app
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response
 from dotenv import load_dotenv
+from dataclasses import dataclass, asdict
+from dacite import from_dict
 from typing import Union, TypeVar, Generic
 from pydantic import BaseModel
 from enum import Enum
@@ -122,7 +124,7 @@ async def get_wallets(): #user = Depends(utils.get_user_token)):
     data = wallet_table.get() #where()
     response = []
     for doc in data:
-        print(doc.to_dict())
-        response.append(schemas.Wallet.from_dict(doc.to_dict()))
+        response.append(asdict(from_dict(data_class=schemas.Wallet, data=doc.to_dict())))
     
+    print(response)
     return response

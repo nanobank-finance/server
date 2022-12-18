@@ -1,7 +1,7 @@
 from typing import Union
 from datetime import datetime
 from enum import Enum
-from pydantic import BaseModel
+from dataclasses import dataclass, asdict
 from random import random
 
 class LoanApplicationState(Enum):
@@ -27,108 +27,48 @@ class LoanPaymentState(Enum):
     COMPLETED_LATE = 5
     MISSED = 6
 
-class User(BaseModel):
-    def __init__(self, uid):
-        self.uid: str = uid
-        
-    def to_dict(self):
-        return {
-            "uid": self.uid
-        }
+@dataclass
+class User:
+    uid: str
 
-class WalletStatus(BaseModel):
-
+@dataclass
+class WalletStatus:
+    is_frozen: bool
+    frozen_reason_code: int
+    doc_id: str = random()
     reasons = {
         101: "missing_user_verification",
         102: "fraud_suspected",
         103: "staked_for_loan"
     }
+ 
+@dataclass
+class LoanPaymentStatus:
+    state: LoanPaymentState
+    next: Union[object, None]
+    previous: Union[object, None]
+    timestamp: datetime
+    doc_id: str = random()
 
-    def __init__(self, is_frozen, frozen_reason_code):
-        self.doc_id: str = random()
-        self.is_frozen: bool = is_frozen
-        self.frozen_reason_code: int = frozen_reason_code
-    
-    def to_dict(self):
-        return {
-            "doc_id": self.doc_id,
-            "is_frozen": self.is_frozen,
-            "frozen_reason_code": self.frozen_reason_code,
-            "frozen_reason_message": self.reasons.get(self.frozen_reason_code)
-        }
-    
+@dataclass   
+class LoanApplicationStatus:
+    state: LoanApplicationState
+    next: Union[object, None]
+    previous: Union[object, None]
+    timestamp: datetime
+    doc_id: str = random()
 
+@dataclass   
+class Wallet:
+    owner: Union[User, None]
+    wallet_type: Union[WalletType, int, None]
+    address: Union[float, str]
+    key: Union[str, None]
+    status: Union[WalletStatus, object, None]
+    doc_id: float = random()
 
-class LoanApplicationStatus(BaseModel):
-    def __init__(self, state, next, previous, timestamp):
-        self.doc_id: str = random()
-        self.state: LoanApplicationState = state
-        self.next: Union[LoanApplicationStatus, None] = next
-        self.previous: Union[LoanApplicationStatus, None] = previous
-        self.timestamp: datetime = timestamp
-
-    def to_dict(self):
-        return {
-            "doc_id": self.doc_id,
-            "state": self.LoanPaymentState,
-            "next": self.LoanApplicationStatus,
-            "previous": self.LoanApplicationStatus,
-            "timestamp": self.timestamp
-        }
-
-class LoanPaymentStatus(BaseModel):
-    def __init__(self, state, next, previous, timestamp):
-        self.doc_id: str = random(),
-        self.state: LoanPaymentState = state
-        self.next: Union[LoanPaymentStatus, None] = next
-        self.previous: Union[LoanPaymentStatus, None] = previous
-        self.timestamp: datetime = timestamp
-        
-    def to_dict(self):
-        return {
-            "doc_id": self.doc_id,
-            "state": self.LoanPaymentState,
-            "next": self.LoanApplicationStatus,
-            "previous": self.LoanApplicationStatus,
-            "timestamp": self.timestamp
-        }
-
-class Wallet(BaseModel):
-    doc_id: str
-    owner: User
-    wallet_type: WalletType
-    address: str
-    key: str
-    status: WalletStatus
-
-    def __init__(self, owner, wallet_type, address, key, wallet_status):
-        self.doc_id = random()
-        self.owner = owner
-        self.wallet_type = wallet_type
-        self.address = address
-        self.key = key
-        self.status = wallet_status
-        
-    def to_dict(self):
-        # do not return key in responses
-        return {
-            "doc_id": self.doc_id,
-            "owner": self.owner,
-            "wallet_type": self.wallet_type,
-            "address": self.address,
-            "status": self.status
-        }
-    
-    @staticmethod
-    def from_dict(data):
-        return Wallet(
-            data.get('owner'),
-            data.get('wallet_type'),
-            data.get('address'),
-            data.get('key'),
-            data.get('status'))
-
-class Loan(BaseModel):
+@dataclass
+class Loan:
     def __init__(
             self,
             principal_in_xno,
@@ -165,7 +105,8 @@ class Loan(BaseModel):
             "borrower": self.borrower
         }
 
-class Stake(BaseModel):
+@dataclass
+class Stake:
     def __init__(
             self,
             owner,
@@ -196,7 +137,8 @@ class Stake(BaseModel):
             "number_of_payment_periods": self.number_of_payment_periods
         }
 
-class LoanPayment(BaseModel):
+@dataclass
+class LoanPayment:
     def __init__(self, loan, due_date, amount_due_in_xno, status):
         self.doc_id: str = random()
         self.loan: Loan = loan

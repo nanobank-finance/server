@@ -6,6 +6,9 @@ from firebase_admin import firestore, auth, credentials, initialize_app
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response
 from dotenv import load_dotenv
+from typing import Union, TypeVar, Generic
+from pydantic import BaseModel
+from enum import Enum
 from pathlib import Path
 import os
 import schemas
@@ -42,6 +45,14 @@ loan_ref = db.collection(u'loan')
 
 # feature store config
 config = utils.get_config()
+
+class SuccessOrFailResponse(BaseModel):
+    success: bool
+    error_message: Union[str, None] = None
+    error_code: Union[int, None] = None
+
+class TokenResponse(BaseModel):
+    token: str
 
 # WIP
 """ sumsub token for kyc and verification """

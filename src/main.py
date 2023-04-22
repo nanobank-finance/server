@@ -2,7 +2,7 @@ from typing import Union, List
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
-from firebase_admin import firestore, auth, credentials, initialize_app
+from firebase_admin import auth, credentials, initialize_app
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response
 from dotenv import load_dotenv
@@ -38,29 +38,16 @@ app.add_middleware(
 )
 
 # firebase auth credentials
-load_dotenv(Path(os.environ['SECRETS_PATH']+"/.env.nanobank"))
+load_dotenv(Path(os.environ['SECRETS_PATH']+"/.env.nanoswap"))
 initialize_app(credential=credentials.Certificate(os.environ['FIREBASE_CREDENTIALS_PATH']))
-
-# database
-db = firestore.client()
-
-wallet_status_table = db.collection(u'wallet_status')
-loan_application_status_table = db.collection(u'loan_application_status')
-loan_payment_status_table = db.collection(u'loan_payment_status')
-wallet_table = db.collection(u'wallet')
-user_table = db.collection(u'user')
-loan_table = db.collection(u'loan')
-stake_table = db.collection(u'stake')
-loan_payment_table = db.collection(u'loan_payment_event')
-
 
 # feature store config
 config = utils.get_config()
 
 
-class TokenResponse(BaseModel):
-    token: str
-
+# class TokenResponse(BaseModel):
+#     token: str
+# 
 # WIP
 # """ sumsub token for kyc and verification """
 # @app.get("/sumsub", response_model=TokenResponse)

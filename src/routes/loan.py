@@ -8,7 +8,6 @@ import pandas as pd
 from src.schemas import SuccessOrFailResponse
 from src.utils import get_user_token
 from ipfsclient.ipfs import Ipfs
-from ipfskvs.store import Store
 from bizlogic.loan.reader import LoanReader
 from bizlogic.loan.writer import LoanWriter
 from bizlogic.application import LoanApplicationReader, LoanApplicationWriter

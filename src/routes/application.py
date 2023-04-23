@@ -51,7 +51,7 @@ class LoanApplicationRouter():
             except Exception as e:
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=e
+                    error_message=str(e)
                 )
 
         @app.get("/loan/user/application")
@@ -64,7 +64,7 @@ class LoanApplicationRouter():
             except Exception as e:
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=e
+                    error_message=str(e)
                 )
 
         @app.delete("/loan/application/{application}", response_model=SuccessOrFailResponse)

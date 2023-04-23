@@ -6,8 +6,15 @@ import datetime
 from src import FIREBASE_PROJECT_ID
 from google.oauth2 import service_account
 from google.auth.transport.requests import AuthorizedSession
+from ipfskvs.store import Store
 import json
 import os
+import logging
+import pandas as pd
+
+
+LOG = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class RouterUtils:
@@ -44,7 +51,7 @@ class RouterUtils:
 
         df.created = pd.to_numeric(df.created)
         if recent:
-            df = self.get_most_recent(df, "application")
+            df = RouterUtils.get_most_recent(df, "application")
 
         return json.loads(df.to_json(orient="records"))
 

@@ -9,6 +9,7 @@ import json
 import os
 import re
 
+
 def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depends(
             HTTPBearer(auto_error=False)
         )):

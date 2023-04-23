@@ -17,19 +17,16 @@ class LoanRouter():
         async def withdraw_loan_application(loan_id: int, user = Depends(get_user_token)):
             return {"Hello": "World"}
 
-
         # Loan endpoints
 
         @app.get("/loans")
         async def get_all_loans(user = Depends(get_user_token)):
             return {"Hello": "World"}
 
-
         @app.get("/loans/user")
         async def get_my_loans(user = Depends(get_user_token)):
             return {"Hello": "World"}
 
-        # WIP
         @app.get("/loan/{loan_id}") #response_model=Union[schemas.Loan, SuccessOrFailResponse])
         async def get_loan_details(loan_id: int, user = Depends(get_user_token)):
             return {"Hello": "World"}

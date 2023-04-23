@@ -6,39 +6,50 @@ from pathlib import Path
 import os
 import src.utils
 from src.routes.loan import LoanRouter
+import logging
 
 app = FastAPI()
 
-class Server():
+origins = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+]
 
-    @staticmethod
-    def startup():
-        # server setup
-        origins = [
-            "http://localhost:8000",
-            "http://127.0.0.1:8000",
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-            "http://localhost:3001",
-            "http://127.0.0.1:3001",
-        ]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-        app.add_middleware(
-            CORSMiddleware,
-            allow_origins=origins,
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
 
-        # firebase auth credentials
-        load_dotenv(Path(os.environ['SECRETS_PATH']+"/.env.nanobank"))
-        initialize_app(credential=credentials.Certificate(os.environ['FIREBASE_CREDENTIALS_PATH']))
+@app.on_event("startup")
+async def startup_firebase():
+    # firebase auth credentials
+    load_dotenv(Path(os.environ['SECRETS_PATH']+"/.env.nanobank"))
+    initialize_app(credential=credentials.Certificate(os.environ['FIREBASE_CREDENTIALS_PATH']))
 
-        # feature store config
-        config = src.utils.get_config()
 
-        # add loan routes
-        LoanRouter(app)
+@app.on_event("startup")
+async def startup_feature_store():
+    # feature store config
+    config = src.utils.get_config()
 
-Server.startup()
+
+@app.on_event("startup")
+async def startup_router():
+    # add loan routes
+    LoanRouter(app)
+
+@app.on_event("startup")
+async def startup_logger():
+    logger = logging.getLogger("uvicorn.access")
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    logger.addHandler(handler)
+

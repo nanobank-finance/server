@@ -2,10 +2,17 @@ from fastapi import Depends
 from typing import List
 from src.schemas import SuccessOrFailResponse
 from src.utils import get_user_token
+from ipfsclient.ipfs import Ipfs
+from bizlogic.loan.reader import LoanReader
+from bizlogic.application.reader import LoanApplicationReader
 
 class LoanRouter():
 
     def __init__(self, app):
+
+        ipfsclient = Ipfs()
+        loan_reader = LoanReader(ipfsclient)
+        loan_application_reader = LoanApplicationReader(ipfsclient)
 
         # Loan application endpoints
 

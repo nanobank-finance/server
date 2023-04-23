@@ -13,6 +13,9 @@ import re
 def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depends(
             HTTPBearer(auto_error=False)
         )):
+    
+    return
+
     if credential is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

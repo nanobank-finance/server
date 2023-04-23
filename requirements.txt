@@ -4,4 +4,5 @@ uvicorn
 pydantic
 firebase-admin
 python-dotenv
-dacite
+bizlogic
+ipfsclient

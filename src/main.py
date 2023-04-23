@@ -7,6 +7,7 @@ import os
 import src.utils
 from src.routes.loan import LoanRouter
 from src.routes.application import LoanApplicationRouter
+from src.routes.vouch import VouchRouter
 import logging
 
 app = FastAPI()
@@ -47,6 +48,7 @@ async def startup_router():
     # add loan routes
     LoanApplicationRouter(app)
     LoanRouter(app)
+    VouchRouter(app)
 
 @app.on_event("startup")
 async def startup_logger():

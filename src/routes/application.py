@@ -31,7 +31,7 @@ class LoanApplicationRouter():
         # Get the most recent data for each application
 
         # convert the "created" field to datetime format
-        df['created'] = self.nanosecond_epoch_to_datetime(df['created'])
+        df['created'] = df['created'].apply(self.nanosecond_epoch_to_datetime)
 
         # group by "application" and get the row with the maximum "created" timestamp per group
         max_created_per_app = df.groupby(group_by)['created'].max().reset_index()
@@ -64,7 +64,31 @@ class LoanApplicationRouter():
             )
         
         @app.get("/loan/application")
-        async def get_borrower_loan_applications(user = Depends(get_user_token), recent: bool = False):
+        async def get_all_loan_applications(user = Depends(get_user_token), recent: bool = False):
+            try:
+                results = loan_application_reader.get_open_loan_applications()
+            except Exception as e:
+                return SuccessOrFailResponse(
+                    success=False,
+                    error_message=e
+                )
+
+            df = Store.to_dataframe(results, protobuf_parsers={
+                "amount_asking": lambda store: store.reader.amount_asking,
+                "closed": lambda store: store.reader.closed,
+            })
+            LOG.debug(df)
+            if len(df) == 0:
+                return []
+
+            df.created = pd.to_numeric(df.created)
+            if recent:
+                df = self.get_most_recent(df, "application")
+
+            return json.loads(df.to_json(orient="records"))
+
+        @app.get("/loan/user/application")
+        async def get_my_loan_applications(user = Depends(get_user_token), recent: bool = False):
             borrower = "123"  # TODO: get from KYC
             try:
                 results = loan_application_reader.get_loan_applications_for_borrower(borrower)

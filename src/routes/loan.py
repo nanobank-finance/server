@@ -20,26 +20,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 class LoanRouter():
 
-
-    def nanosecond_epoch_to_datetime(self, timestamp):
-        timestamp = int(timestamp)
-        seconds = timestamp // 1000000000
-        nanoseconds = timestamp % 1000000000
-        return datetime.datetime.fromtimestamp(seconds) + datetime.timedelta(microseconds=nanoseconds // 1000)
-
-    def get_most_recent(self, df, group_by):
-        # Get the most recent data for each application
-
-        # convert the "created" field to datetime format
-        df['created'] = self.nanosecond_epoch_to_datetime(df['created'])
-
-        # group by "application" and get the row with the maximum "created" timestamp per group
-        max_created_per_app = df.groupby(group_by)['created'].max().reset_index()
-
-        # join the original dataframe with the grouped data to get the full row with the maximum "created" per application
-        return pd.merge(df, max_created_per_app, on=[group_by, 'created'], how='inner')
-
-
     def __init__(self, app):
 
         ipfsclient = Ipfs()

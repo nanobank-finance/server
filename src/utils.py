@@ -2,11 +2,53 @@ from firebase_admin import firestore, auth, credentials, initialize_app
 # from firebase.auth import # todo: start auth emulator properly on the server side
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response
+import datetime
 from src import FIREBASE_PROJECT_ID
 from google.oauth2 import service_account
 from google.auth.transport.requests import AuthorizedSession
 import json
 import os
+
+
+class RouterUtils:
+
+    @staticmethod
+    def nanosecond_epoch_to_datetime(timestamp):
+        timestamp = int(timestamp)
+        seconds = timestamp // 1000000000
+        nanoseconds = timestamp % 1000000000
+        return datetime.datetime.fromtimestamp(seconds) + datetime.timedelta(microseconds=nanoseconds // 1000)
+
+    @staticmethod
+    def get_most_recent(df, group_by):
+        # Get the most recent data for each application
+
+        # convert the "created" field to datetime format
+        df['created'] = df['created'].apply(RouterUtils.nanosecond_epoch_to_datetime)
+
+        # group by "application" and get the row with the maximum "created" timestamp per group
+        max_created_per_app = df.groupby(group_by)['created'].max().reset_index()
+
+        # join the original dataframe with the grouped data to get the full row with the maximum "created" per application
+        return pd.merge(df, max_created_per_app, on=[group_by, 'created'], how='inner')
+
+    @staticmethod
+    def parse_results(data, recent):
+        df = Store.to_dataframe(data, protobuf_parsers={
+            "amount_asking": lambda store: store.reader.amount_asking,
+            "closed": lambda store: store.reader.closed,
+        })
+        LOG.debug(df)
+        if len(df) == 0:
+            return []
+
+        df.created = pd.to_numeric(df.created)
+        if recent:
+            df = self.get_most_recent(df, "application")
+
+        return json.loads(df.to_json(orient="records"))
+
+# other utils
 
 def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depends(
             HTTPBearer(auto_error=False)

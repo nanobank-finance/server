@@ -1,6 +1,7 @@
 from fastapi import Depends
 from typing import List
 import json
+import pandas as pd
 from src.schemas import SuccessOrFailResponse
 from src.utils import get_user_token
 from ipfsclient.ipfs import Ipfs
@@ -38,7 +39,7 @@ class LoanRouter():
             )
         
         @app.get("/loan/application")
-        async def get_borrower_loan_applications(user = Depends(get_user_token)):
+        async def get_borrower_loan_applications(user = Depends(get_user_token), most_recent: bool = False):
             borrower = "123"  # TODO: get from KYC
             try:
                 results = loan_application_reader.get_loan_applications_for_borrower(borrower)
@@ -48,10 +49,20 @@ class LoanRouter():
                     error_message=e
                 )
 
-            return json.loads(Store.to_dataframe(results, protobuf_parsers={
+            df = Store.to_dataframe(results, protobuf_parsers={
                 "amount_asking": lambda store: store.reader.amount_asking,
                 "closed": lambda store: store.reader.closed,
-            }).to_json())
+            })
+            df.created = pd.to_numeric(df.created)
+            df.index = df.created
+
+            if most_recent:
+                # TODO: group by 'created' on 'application'
+                # Get the most recent data for each application
+                # df = df.loc[df['created'].idxmax()]
+                pass
+
+            return json.loads(df.to_json(orient="index"))
 
         @app.delete("/loan/application/{loan_id}", response_model=SuccessOrFailResponse)
         async def withdraw_loan_application(loan_id: int, user = Depends(get_user_token)):

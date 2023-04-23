@@ -7,8 +7,6 @@ from google.oauth2 import service_account
 from google.auth.transport.requests import AuthorizedSession
 import json
 import os
-import re
-
 
 def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depends(
             HTTPBearer(auto_error=False)

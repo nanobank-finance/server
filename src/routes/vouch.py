@@ -29,21 +29,20 @@ class VouchRouter():
         # Loan application endpoints
 
         @app.post("/vouch", response_model=SuccessOrFailResponse)
-        async def submit_vouch(asking: int, user = Depends(get_user_token)):
-            borrower = "123"  # TODO: get from KYC
+        async def submit_vouch(vouchee: str, user = Depends(get_user_token)):
+            voucher = "123"  # TODO: get from KYC
             try:
-                # vouch_writer = VouchWriter(ipfsclient, borrower, asking)
-                # vouch_writer.write()
-                pass
+                vouch_writer = VouchWriter(ipfsclient, voucher, vouchee)
+                vouch_writer.write()
+
+                return SuccessOrFailResponse(
+                    success=True
+                )
             except Exception as e:
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e)
                 )
-
-            return SuccessOrFailResponse(
-                success=True
-            )
         
         @app.get("/vouch/user/voucher")
         async def get_my_vouchers(recent: bool = False, user = Depends(get_user_token)):

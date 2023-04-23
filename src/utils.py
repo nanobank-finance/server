@@ -2,12 +2,13 @@ from firebase_admin import firestore, auth, credentials, initialize_app
 # from firebase.auth import # todo: start auth emulator properly on the server side
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends, HTTPException, status, Response
-from const import FIREBASE_PROJECT_ID
+from src import FIREBASE_PROJECT_ID
 from google.oauth2 import service_account
 from google.auth.transport.requests import AuthorizedSession
 import json
 import os
 import re
+
 
 def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depends(
             HTTPBearer(auto_error=False)

@@ -4,3 +4,4 @@ uvicorn
 pydantic
 firebase-admin
 python-dotenv
+dacite

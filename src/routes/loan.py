@@ -6,7 +6,7 @@ import datetime
 from datetime import timezone
 import pandas as pd
 from src.schemas import SuccessOrFailResponse
-from src.utils import get_user_token
+from src.utils import ParserType, get_user_token
 from ipfsclient.ipfs import Ipfs
 from bizlogic.loan.status import LoanStatusType
 from bizlogic.loan.reader import LoanReader
@@ -32,8 +32,9 @@ class LoanRouter():
         async def get_open_loans(recent: bool = False, user = Depends(get_user_token)):
             try:
                 results = loan_reader.query_for_status(LoanStatusType.PENDING_ACCEPTANCE)
-                return RouterUtils.parse_results(results, recent)
+                return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e)
@@ -43,8 +44,9 @@ class LoanRouter():
         async def get_accepted_loans(recent: bool = False, user = Depends(get_user_token)):
             try:
                 results = loan_reader.query_for_status(LoanStatusType.ACCEPTED)
-                return RouterUtils.parse_results(results, recent)
+                return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e)
@@ -95,6 +97,7 @@ class LoanRouter():
                     success=True
                 )
             except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e)

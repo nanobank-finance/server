@@ -6,7 +6,7 @@ import datetime
 from datetime import timezone
 import pandas as pd
 from src.schemas import SuccessOrFailResponse
-from src.utils import get_user_token
+from src.utils import ParserType, get_user_token
 from ipfsclient.ipfs import Ipfs
 from ipfskvs.store import Store
 from bizlogic.loan.reader import LoanReader
@@ -49,7 +49,7 @@ class VouchRouter():
             borrower = "123"  # TODO: get from KYC
             try:
                 results = vouch_reader.get_vouchers_for_borrower(borrower)
-                return RouterUtils.parse_results(results, recent)
+                return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
             except Exception as e:
                 return SuccessOrFailResponse(
                     success=False,
@@ -61,7 +61,7 @@ class VouchRouter():
             borrower = "123"  # TODO: get from KYC
             try:
                 results = vouch_reader.get_vouchers_for_borrower(borrower)
-                return RouterUtils.parse_results(results, recent)
+                return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
             except Exception as e:
                 return SuccessOrFailResponse(
                     success=False,

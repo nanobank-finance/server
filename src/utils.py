@@ -11,10 +11,32 @@ import json
 import os
 import logging
 import pandas as pd
+from enum import Enum
 
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
+
+
+class ParserType:
+    LOAN_APPLICATION = 1
+    LOAN = 2
+    VOUCH = 3
+
+
+PARSERS = {
+    ParserType.LOAN_APPLICATION: {
+        "amount_asking": lambda store: store.reader.amount_asking,
+        "closed": lambda store: store.reader.closed,
+    },
+    ParserType.LOAN: {
+        "principal": lambda store: store.reader.principal_amount,
+        "offer_expiry": lambda store: datetime.datetime.fromtimestamp(store.reader.offer_expiry.seconds + store.reader.offer_expiry.nanos/1e9),
+        "transaction": lambda store: store.reader.transaction,
+        "accepted": lambda store: store.reader.accepted,
+        "payments": lambda store: len(store.reader.repayment_schedule)
+    }
+}
 
 
 class RouterUtils:
@@ -40,11 +62,8 @@ class RouterUtils:
         return pd.merge(df, max_created_per_app, on=[group_by, 'created'], how='inner')
 
     @staticmethod
-    def parse_results(data, recent):
-        df = Store.to_dataframe(data, protobuf_parsers={
-            "amount_asking": lambda store: store.reader.amount_asking,
-            "closed": lambda store: store.reader.closed,
-        })
+    def parse_results(data, recent, parser_type):
+        df = Store.to_dataframe(data, protobuf_parsers=PARSERS[parser_type])
         LOG.debug(df)
         if len(df) == 0:
             return []

@@ -6,7 +6,7 @@ import datetime
 from datetime import timezone
 import pandas as pd
 from src.schemas import SuccessOrFailResponse
-from src.utils import get_user_token
+from src.utils import ParserType, get_user_token
 from ipfsclient.ipfs import Ipfs
 from ipfskvs.store import Store
 from bizlogic.loan.reader import LoanReader
@@ -38,6 +38,7 @@ class LoanApplicationRouter():
                     success=True
                 )
             except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e)
@@ -47,8 +48,9 @@ class LoanApplicationRouter():
         async def get_all_loan_applications(recent: bool = False, user = Depends(get_user_token)):
             try:
                 results = loan_application_reader.get_open_loan_applications()
-                return RouterUtils.parse_results(results, recent)
+                return RouterUtils.parse_results(results, recent, ParserType.LOAN_APPLICATION)
             except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e)
@@ -60,8 +62,9 @@ class LoanApplicationRouter():
 
             try:
                 results = loan_application_reader.get_loan_applications_for_borrower(borrower)
-                return RouterUtils.parse_results(results, recent)
+                return RouterUtils.parse_results(results, recent, ParserType.LOAN_APPLICATION)
             except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e)
@@ -92,6 +95,7 @@ class LoanApplicationRouter():
                     success=True
                 )
             except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e)

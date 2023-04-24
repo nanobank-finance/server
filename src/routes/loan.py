@@ -77,7 +77,7 @@ class LoanRouter():
                     interest_rate=interest,
                     total_duration=pd.Timedelta(duration, unit='ns'),
                     number_of_payments=payments,
-                    start=offer_expiry_date
+                    first_payment=offer_expiry_date
                 )
 
                 loan_writer = LoanWriter(

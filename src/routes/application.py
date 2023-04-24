@@ -41,7 +41,8 @@ class LoanApplicationRouter():
                 LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )
         
         @app.get("/loan/application")
@@ -53,7 +54,8 @@ class LoanApplicationRouter():
                 LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )
 
         @app.get("/loan/user/application")
@@ -67,7 +69,8 @@ class LoanApplicationRouter():
                 LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )
 
         @app.delete("/loan/application/{application}", response_model=SuccessOrFailResponse)
@@ -98,5 +101,6 @@ class LoanApplicationRouter():
                 LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )

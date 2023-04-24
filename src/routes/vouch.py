@@ -41,7 +41,8 @@ class VouchRouter():
             except Exception as e:
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )
         
         @app.get("/vouch/user/voucher")
@@ -53,7 +54,8 @@ class VouchRouter():
             except Exception as e:
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )
 
         @app.get("/vouch/user/vouchee")
@@ -65,5 +67,6 @@ class VouchRouter():
             except Exception as e:
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )

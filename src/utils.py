@@ -38,6 +38,11 @@ PARSERS = {
     }
 }
 
+GROUP_BY = {
+    ParserType.LOAN_APPLICATION: 'application',
+    ParserType.LOAN: 'loan'
+}
+
 
 class RouterUtils:
 
@@ -70,7 +75,7 @@ class RouterUtils:
 
         df.created = pd.to_numeric(df.created)
         if recent:
-            df = RouterUtils.get_most_recent(df, "application")
+            df = RouterUtils.get_most_recent(df, GROUP_BY[parser_type])
 
         return json.loads(df.to_json(orient="records"))
 

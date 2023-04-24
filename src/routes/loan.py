@@ -37,7 +37,8 @@ class LoanRouter():
                 LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )
 
         @app.get("/loans/accepted")
@@ -49,16 +50,36 @@ class LoanRouter():
                 LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )
 
         @app.get("/loans/user")
-        async def get_my_loans(user = Depends(get_user_token)):
-            return {"Hello": "World"}
+        async def get_my_loans(recent: bool = False, user = Depends(get_user_token)):
+            borrower = "123"  # TODO: get from KYC
+            try:
+                results = loan_reader.query_for_borrower(borrower)
+                return RouterUtils.parse_results(results, recent, ParserType.LOAN)
+            except Exception as e:
+                LOG.exception(e)
+                return SuccessOrFailResponse(
+                    success=False,
+                    error_message=str(e),
+                    error_type=type(e).__name__
+                )
 
-        @app.get("/loan/{loan_id}") #response_model=Union[schemas.Loan, SuccessOrFailResponse])
-        async def get_loan_details(loan_id: int, user = Depends(get_user_token)):
-            return {"Hello": "World"}
+        @app.get("/loan") #response_model=Union[schemas.Loan, SuccessOrFailResponse])
+        async def get_loan_details(loan_id: str, recent: bool = False, user = Depends(get_user_token)):
+            try:
+                results = loan_reader.query_for_loan(loan_id)
+                return RouterUtils.parse_results(results, recent, ParserType.LOAN)
+            except Exception as e:
+                LOG.exception(e)
+                return SuccessOrFailResponse(
+                    success=False,
+                    error_message=str(e),
+                    error_type=type(e).__name__
+                )
 
         @app.post("/loan") #response_model=Union[schemas.Loan, SuccessOrFailResponse])
         async def create_loan_offer(
@@ -100,5 +121,6 @@ class LoanRouter():
                 LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
-                    error_message=str(e)
+                    error_message=str(e),
+                    error_type=type(e).__name__
                 )

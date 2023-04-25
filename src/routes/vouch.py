@@ -60,11 +60,16 @@ class VouchRouter():
                     error_type=type(e).__name__
                 )
         
-        @app.get("/vouch/user/voucher")
-        async def get_my_vouchers(recent: bool = False, user = Depends(get_user_token)):
+        @app.get("/vouch/user/self")
+        async def get_my_vouchers(perspective: str = "voucher", recent: bool = False, user = Depends(get_user_token)):
+            assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)
             borrower = "123"  # TODO: get from KYC
             try:
-                results = vouch_reader.get_vouchers_for_borrower(borrower)
+                if perspective == "voucher":
+                    results = vouch_reader.get_vouchers_for_borrower(borrower)
+                elif perspective == "vouchee":
+                    results = vouch_reader.get_vouchees_for_borrower(borrower)
+
                 return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
             except Exception as e:
                 LOG.exception(e)
@@ -73,12 +78,16 @@ class VouchRouter():
                     error_message=str(e),
                     error_type=type(e).__name__
                 )
-
-        @app.get("/vouch/user/vouchee")
-        async def get_my_vouchees(recent: bool = False, user = Depends(get_user_token)):
-            borrower = "123"  # TODO: get from KYC
+            
+        @app.get("/vouch/user/other")
+        async def get_their_vouchers(them: str, perspective: str = "voucher", recent: bool = False, user = Depends(get_user_token)):
+            assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)
             try:
-                results = vouch_reader.get_vouchers_for_borrower(borrower)
+                if perspective == "voucher":
+                    results = vouch_reader.get_vouchers_for_borrower(them)
+                elif perspective == "vouchee":
+                    results = vouch_reader.get_vouchees_for_borrower(them)
+
                 return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
             except Exception as e:
                 LOG.exception(e)

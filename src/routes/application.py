@@ -58,12 +58,25 @@ class LoanApplicationRouter():
                     error_type=type(e).__name__
                 )
 
-        @app.get("/loan/user/application")
+        @app.get("/loan/application/user/self")
         async def get_my_loan_applications(recent: bool = False, user = Depends(get_user_token)):
             borrower = "123"  # TODO: get from KYC
 
             try:
                 results = loan_application_reader.get_loan_applications_for_borrower(borrower)
+                return RouterUtils.parse_results(results, recent, ParserType.LOAN_APPLICATION)
+            except Exception as e:
+                LOG.exception(e)
+                return SuccessOrFailResponse(
+                    success=False,
+                    error_message=str(e),
+                    error_type=type(e).__name__
+                )
+
+        @app.get("/loan/application/user/other")
+        async def get_their_loan_applications(them: str, recent: bool = False, user = Depends(get_user_token)):
+            try:
+                results = loan_application_reader.get_loan_applications_for_borrower(them)
                 return RouterUtils.parse_results(results, recent, ParserType.LOAN_APPLICATION)
             except Exception as e:
                 LOG.exception(e)

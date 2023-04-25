@@ -35,12 +35,16 @@ PARSERS = {
         "transaction": lambda store: store.reader.transaction,
         "accepted": lambda store: store.reader.accepted,
         "payments": lambda store: len(store.reader.repayment_schedule)
+    },
+    ParserType.VOUCH: {
+        "voucher": lambda store: store.reader.voucher
     }
 }
 
 GROUP_BY = {
     ParserType.LOAN_APPLICATION: 'application',
-    ParserType.LOAN: 'loan'
+    ParserType.LOAN: 'loan',
+    ParserType.VOUCH: 'vouch'
 }
 
 

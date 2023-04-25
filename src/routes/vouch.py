@@ -39,6 +39,21 @@ class VouchRouter():
                     success=True
                 )
             except Exception as e:
+                LOG.exception(e)
+                return SuccessOrFailResponse(
+                    success=False,
+                    error_message=str(e),
+                    error_type=type(e).__name__
+                )
+        
+        @app.get("/vouch")
+        async def get_all_vouches(recent: bool = False, user = Depends(get_user_token)):
+            borrower = "123"  # TODO: get from KYC
+            try:
+                results = vouch_reader.get_all_vouches()
+                return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
+            except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e),
@@ -52,6 +67,7 @@ class VouchRouter():
                 results = vouch_reader.get_vouchers_for_borrower(borrower)
                 return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
             except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e),
@@ -65,6 +81,7 @@ class VouchRouter():
                 results = vouch_reader.get_vouchers_for_borrower(borrower)
                 return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
             except Exception as e:
+                LOG.exception(e)
                 return SuccessOrFailResponse(
                     success=False,
                     error_message=str(e),

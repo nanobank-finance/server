@@ -53,12 +53,51 @@ class LoanRouter():
                     error_message=str(e),
                     error_type=type(e).__name__
                 )
-
-        @app.get("/loans/user")
-        async def get_my_loans(recent: bool = False, user = Depends(get_user_token)):
+        
+        @app.get("/loans/user/open")
+        async def get_my_open_loans(perspective: str = "borrower", recent: bool = False, user = Depends(get_user_token)):
+            assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)
             borrower = "123"  # TODO: get from KYC
             try:
-                results = loan_reader.query_for_borrower(borrower)
+                results = loan_reader.query_for_status(LoanStatusType.PENDING_ACCEPTANCE, index={
+                    perspective: borrower
+                })
+                return RouterUtils.parse_results(results, recent, ParserType.LOAN)
+            except Exception as e:
+                LOG.exception(e)
+                return SuccessOrFailResponse(
+                    success=False,
+                    error_message=str(e),
+                    error_type=type(e).__name__
+                )
+
+        @app.get("/loans/user/accepted")
+        async def get_my_accepted_loans(perspective: str = "borrower", recent: bool = False, user = Depends(get_user_token)):
+            assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)
+            borrower = "123"  # TODO: get from KYC
+            try:
+                results = loan_reader.query_for_status(LoanStatusType.ACCEPTED, index={
+                    perspective: borrower
+                })
+                return RouterUtils.parse_results(results, recent, ParserType.LOAN)
+            except Exception as e:
+                LOG.exception(e)
+                return SuccessOrFailResponse(
+                    success=False,
+                    error_message=str(e),
+                    error_type=type(e).__name__
+                )
+
+        @app.get("/loans/user")
+        async def get_my_loans(perspective: str = "borrower", recent: bool = False, user = Depends(get_user_token)):
+            assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)
+            borrower = "123"  # TODO: get from KYC
+            try:
+                if perspective == "borrower":
+                    results = loan_reader.query_for_borrower(borrower)
+                elif perspective == "lender":
+                    results = loan_reader.query_for_lender(borrower)
+
                 return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
                 LOG.exception(e)
@@ -124,3 +163,7 @@ class LoanRouter():
                     error_message=str(e),
                     error_type=type(e).__name__
                 )
+
+        # TODO: accept loan offer
+
+        # TODO: make payment

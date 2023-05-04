@@ -7,3 +7,4 @@ python-dotenv
 bizlogic
 ipfsclient
 ipfskvs
+httpx

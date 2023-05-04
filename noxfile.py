@@ -2,6 +2,10 @@ import shutil
 from pathlib import Path
 
 import nox
+import os
+import subprocess
+import time
+from signal import SIGKILL
 
 DIR = Path(__file__).parent.resolve()
 
@@ -22,9 +26,22 @@ def tests(session: nox.Session) -> None:
     """Run the tests."""
     session.install("-r", "requirements.txt")
     session.install('pytest')
-    session.install("pytest-cov")
+    session.install("pytest-asyncio")
     session.env["PYTHONPATH"] = "src"
-    session.run("pytest", "--cov=src")
+
+    # run the server
+    process = subprocess.Popen(['uvicorn src.main:app'], shell=True)
+    print(f"webserver process id: {process.pid}")
+
+    try:
+        # wait for the server to startup
+        time.sleep(5)
+
+        # run the integration tests
+        session.run("pytest", "-p", "pytest_asyncio", "--asyncio-mode=auto")
+    finally:
+        # close the server process
+        os.kill(process.pid, SIGKILL)
 
 
 @nox.session(python=["python3.11"])

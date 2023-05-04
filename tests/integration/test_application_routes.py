@@ -8,8 +8,9 @@ from src.main import app
 
 
 @pytest.fixture
+@pytest.mark.asyncio
 async def client():
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(app=app, base_url="http://127.0.0.1:8000") as client:
         yield client
 
 
@@ -69,3 +70,20 @@ async def test_get_their_loan_applications(client: AsyncClient, user_token: Dict
     # Then
     assert response.status_code == 200
     assert "results" in response.json()
+
+
+@pytest.mark.asyncio
+async def test_withdraw_loan_application(client: AsyncClient, user_token: Dict[str, str]):
+    # Create an application
+    response = await client.post("/loan/application", json={"asking": 1000}, headers=user_token)
+    # Get the application
+    response = await client.get("/loan/application/user/self", params={"recent": True}, headers=user_token)
+    # Parse the results, get the application id to withdraw
+    print(response.json())
+    application = response.json()
+    # Withdraw the application
+    response = await client.delete(f"/loan/application/{application}", headers=user_token)
+
+    # Then
+    assert response.status_code == 200
+    assert response.json()["success"] is True

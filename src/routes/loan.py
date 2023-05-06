@@ -1,3 +1,4 @@
+"""Loan Routes."""
 from fastapi import Depends
 import logging
 from typing import List
@@ -5,7 +6,7 @@ import json
 import datetime
 from datetime import timezone
 import pandas as pd
-from src.schemas import SuccessOrFailResponse
+from src.schemas import SuccessOrFailureResponse
 from src.utils import ParserType, get_user_token
 from ipfsclient.ipfs import Ipfs
 from bizlogic.loan.status import LoanStatusType
@@ -35,7 +36,7 @@ class LoanRouter():
                 return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
@@ -48,7 +49,7 @@ class LoanRouter():
                 return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
@@ -65,7 +66,7 @@ class LoanRouter():
                 return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
@@ -82,7 +83,7 @@ class LoanRouter():
                 return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
@@ -101,7 +102,7 @@ class LoanRouter():
                 return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
@@ -119,26 +120,26 @@ class LoanRouter():
                 return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
                 )
 
-        @app.get("/loan") #response_model=Union[schemas.Loan, SuccessOrFailResponse])
+        @app.get("/loan") #response_model=Union[schemas.Loan, SuccessOrFailureResponse])
         async def get_loan_details(loan_id: str, recent: bool = False, user = Depends(get_user_token)):
             try:
                 results = loan_reader.query_for_loan(loan_id)
                 return RouterUtils.parse_results(results, recent, ParserType.LOAN)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
                 )
 
-        @app.post("/loan") #response_model=Union[schemas.Loan, SuccessOrFailResponse])
+        @app.post("/loan") #response_model=Union[schemas.Loan, SuccessOrFailureResponse])
         async def create_loan_offer(
                 borrower: str,
                 principal: int,
@@ -171,12 +172,12 @@ class LoanRouter():
 
                 loan_writer.write()
 
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=True
                 )
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__

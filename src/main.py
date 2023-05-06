@@ -1,14 +1,19 @@
+"""Main."""
+import logging
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from firebase_admin import credentials, initialize_app
-from dotenv import load_dotenv
-from pathlib import Path
-import os
+
 import src.utils
-from src.routes.loan import LoanRouter
 from src.routes.application import LoanApplicationRouter
+from src.routes.loan import LoanRouter
 from src.routes.vouch import VouchRouter
-import logging
 
 app = FastAPI()
 
@@ -31,28 +36,41 @@ app.add_middleware(
 
 
 @app.on_event("startup")
-async def startup_firebase():
+async def startup_firebase() -> None:
+    """Initialize firebase app."""
     # firebase auth credentials
     load_dotenv(Path(os.environ['SECRETS_PATH']+"/.env.nanobank"))
-    initialize_app(credential=credentials.Certificate(os.environ['FIREBASE_CREDENTIALS_PATH']))
+    initialize_app(
+        credential=credentials.Certificate(
+            os.environ['FIREBASE_CREDENTIALS_PATH']
+        )
+    )
 
 
 @app.on_event("startup")
-async def startup_feature_store():
+async def startup_feature_store() -> None:
+    """Initialize feature store."""
     # feature store config
-    config = src.utils.get_config()
+    src.utils.get_config()
 
 
 @app.on_event("startup")
-async def startup_router():
+async def startup_router() -> None:
+    """Add routes."""
     # add loan routes
     LoanApplicationRouter(app)
     LoanRouter(app)
     VouchRouter(app)
 
+
 @app.on_event("startup")
-async def startup_logger():
+async def startup_logger() -> None:
+    """Initialize logger."""
     logger = logging.getLogger("uvicorn.access")
     handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+    handler.setFormatter(
+        logging.Formatter(
+            "%(asctime)s - %(levelname)s - %(message)s"
+        )
+    )
     logger.addHandler(handler)

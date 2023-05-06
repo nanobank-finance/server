@@ -1,17 +1,14 @@
-from fastapi import Depends
+"""Vouch Routes."""
 import logging
-from typing import List
-import json
-import datetime
-from datetime import timezone
-import pandas as pd
-from src.schemas import SuccessOrFailResponse
-from src.utils import ParserType, get_user_token
+
+from fastapi import Depends
+
 from ipfsclient.ipfs import Ipfs
-from ipfskvs.store import Store
-from bizlogic.loan.reader import LoanReader
-from bizlogic.loan.writer import LoanWriter
+
 from bizlogic.vouch import VouchReader, VouchWriter
+
+from src.schemas import SuccessOrFailureResponse
+from src.utils import ParserType, get_user_token
 from src.utils import RouterUtils
 
 
@@ -28,19 +25,19 @@ class VouchRouter():
 
         # Loan application endpoints
 
-        @app.post("/vouch", response_model=SuccessOrFailResponse)
+        @app.post("/vouch", response_model=SuccessOrFailureResponse)
         async def submit_vouch(vouchee: str, user = Depends(get_user_token)):
             voucher = "123"  # TODO: get from KYC
             try:
                 vouch_writer = VouchWriter(ipfsclient, voucher, vouchee)
                 vouch_writer.write()
 
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=True
                 )
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
@@ -54,7 +51,7 @@ class VouchRouter():
                 return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
@@ -73,7 +70,7 @@ class VouchRouter():
                 return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__
@@ -91,7 +88,7 @@ class VouchRouter():
                 return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
             except Exception as e:
                 LOG.exception(e)
-                return SuccessOrFailResponse(
+                return SuccessOrFailureResponse(
                     success=False,
                     error_message=str(e),
                     error_type=type(e).__name__

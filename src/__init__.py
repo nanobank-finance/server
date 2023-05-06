@@ -1,1 +1,2 @@
-FIREBASE_PROJECT_ID="nanocryptobank"
+"""__init__."""
+FIREBASE_PROJECT_ID = "nanocryptobank"

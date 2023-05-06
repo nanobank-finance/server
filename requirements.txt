@@ -8,3 +8,14 @@ bizlogic
 ipfsclient
 ipfskvs
 httpx
+
+# for tests and linting
+nox
+mock
+pytest
+pytest-cov
+flake8
+flake8-docstrings
+flake8-annotations
+flake8-import-order
+Faker

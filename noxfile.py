@@ -25,9 +25,8 @@ def build(session: nox.Session) -> None:
 def tests(session: nox.Session) -> None:
     """Run the tests."""
     session.install("-r", "requirements.txt")
-    session.install('pytest')
     session.env["PYTHONPATH"] = "src"
-    session.run("pytest")
+    session.run("pytest", "--cov=src")
 
 
 @nox.session(python=["python3.11"])

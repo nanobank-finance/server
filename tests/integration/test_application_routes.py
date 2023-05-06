@@ -27,7 +27,10 @@ def test_submit_loan_application(
     asking = 1000
 
     # When
-    response = client.post(f"{base_url}/loan/application?asking={asking}", headers=user_token)
+    response = client.post(
+        f"{base_url}/loan/application?asking={asking}",
+        headers=user_token
+    )
 
     # Then
     assert response.status_code == 200
@@ -41,7 +44,10 @@ def test_get_all_loan_applications(
     recent = False
 
     # When
-    response = client.get(f"{base_url}/loan/application?recent={recent}", headers=user_token)
+    response = client.get(
+        f"{base_url}/loan/application?recent={recent}",
+        headers=user_token
+    )
 
     # Then
     assert response.status_code == 200

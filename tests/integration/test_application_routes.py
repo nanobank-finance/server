@@ -1,18 +1,11 @@
 from typing import Dict
 
 import pytest
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from src.main import app
+from tests import client
 
 base_url = "http://127.0.0.1:8000"
-
-
-@pytest.fixture(scope='session')
-def client():
-    with TestClient(app, base_url=base_url) as client:
-        yield client
 
 
 @pytest.fixture
@@ -20,9 +13,7 @@ def user_token() -> Dict[str, str]:
     return {"access_token": "your_access_token"}
 
 
-def test_submit_loan_application(
-        user_token: Dict[str, str],
-        client: TestClient) -> None:
+def test_submit_loan_application(user_token: Dict[str, str]) -> None:
     # Given
     asking = 1000
 
@@ -37,9 +28,7 @@ def test_submit_loan_application(
     assert response.json()["success"] == True
 
 
-def test_get_all_loan_applications(
-        user_token: Dict[str, str],
-        client: TestClient) -> None:
+def test_get_all_loan_applications(user_token: Dict[str, str]) -> None:
     # Given
     recent = False
 
@@ -53,9 +42,7 @@ def test_get_all_loan_applications(
     assert response.status_code == 200
 
 
-def test_get_my_loan_applications(
-        user_token: Dict[str, str],
-        client: TestClient) -> None:
+def test_get_my_loan_applications(user_token: Dict[str, str]) -> None:
     # Given
     recent = False
 
@@ -69,9 +56,7 @@ def test_get_my_loan_applications(
     assert response.status_code == 200
 
 
-def test_get_their_loan_applications(
-        user_token: Dict[str, str],
-        client: TestClient) -> None:
+def test_get_their_loan_applications(user_token: Dict[str, str]) -> None:
     # Given
     recent = False
     them = 123
@@ -86,9 +71,7 @@ def test_get_their_loan_applications(
     assert response.status_code == 200
 
 
-def test_withdraw_loan_application(
-        user_token: Dict[str, str],
-        client: TestClient) -> None:
+def test_withdraw_loan_application(user_token: Dict[str, str]) -> None:
     # Given
     asking = 1000
     recent = True

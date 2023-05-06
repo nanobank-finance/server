@@ -1,3 +1,4 @@
+# flake8: noqa
 """Source: https://github.com/SumSubstance/AppTokenUsageExamples/blob/master/Python/AppTokenPythonExample.py"""
 import hashlib
 import hmac

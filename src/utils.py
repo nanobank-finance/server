@@ -1,18 +1,21 @@
+"""Utils."""
 import datetime
 import json
-import os
 import logging
-import pandas as pd
+import os
+from typing import Any, List
+
+from fastapi import Depends, HTTPException, Response, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from firebase_admin import auth
 
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi import Depends, HTTPException, status, Response
-
-from google.oauth2 import service_account
 from google.auth.transport.requests import AuthorizedSession
+from google.oauth2 import service_account
 
 from ipfskvs.store import Store
+
+import pandas as pd
 
 from src import FIREBASE_PROJECT_ID
 
@@ -22,9 +25,25 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class ParserType:
+    """The type of protobuf object."""
+
     LOAN_APPLICATION = 1
     LOAN = 2
     VOUCH = 3
+
+
+def parse_offer_expiry(store: Store) -> datetime.date:
+    """Get the offer expiry timestamp as a datetime.
+
+    Args:
+        store (Store): The store object to parse
+
+    Returns:
+        datetime.date: The offer expiry
+    """
+    return datetime.datetime.fromtimestamp(
+        store.reader.offer_expiry.seconds + store.reader.offer_expiry.nanos / 1e9  # noqa: E501
+    )
 
 
 PARSERS = {
@@ -34,7 +53,7 @@ PARSERS = {
     },
     ParserType.LOAN: {
         "principal": lambda store: store.reader.principal_amount,
-        "offer_expiry": lambda store: datetime.datetime.fromtimestamp(store.reader.offer_expiry.seconds + store.reader.offer_expiry.nanos/1e9),
+        "offer_expiry": parse_offer_expiry,
         "transaction": lambda store: store.reader.transaction,
         "accepted": lambda store: store.reader.accepted,
         "payments": lambda store: len(store.reader.repayment_schedule)
@@ -52,30 +71,70 @@ GROUP_BY = {
 
 
 class RouterUtils:
+    """Router Utils."""
 
     @staticmethod
-    def nanosecond_epoch_to_datetime(timestamp):
-        """Convert """
+    def nanosecond_epoch_to_datetime(timestamp: int) -> datetime.date:
+        """Convert nano seconds since epoch to date.
+
+        Args:
+            timestamp (int): Count of nanoseconds since 1970 Jan 1
+
+        Returns:
+            datetime.date: The date corresponding to the timestamp
+        """
         timestamp = int(timestamp)
         seconds = timestamp // 1000000000
         nanoseconds = timestamp % 1000000000
-        return datetime.datetime.fromtimestamp(seconds) + datetime.timedelta(microseconds=nanoseconds // 1000)
+        return datetime.datetime.fromtimestamp(
+            seconds
+        ) + datetime.timedelta(
+            microseconds=nanoseconds // 1000
+        )
 
     @staticmethod
-    def get_most_recent(df, group_by):
-        # Get the most recent data for each application
+    def get_most_recent(df: pd.DataFrame, group_by: str) -> pd.DataFrame:
+        """Filter a CDC dataframe to get only the most recent of each object.
 
+        Args:
+            df (pd.DataFrame): The dataframe to filter
+            group_by (str): The object id to group by
+
+        Returns:
+            pd.DataFrame: The filtered dataframe
+        """
         # convert the "created" field to datetime format
-        df['created'] = df['created'].apply(RouterUtils.nanosecond_epoch_to_datetime)
+        df['created'] = df['created'].apply(
+            RouterUtils.nanosecond_epoch_to_datetime
+        )
 
-        # group by "application" and get the row with the maximum "created" timestamp per group
-        max_created_per_app = df.groupby(group_by)['created'].max().reset_index()
+        # group by application|loan|vouch
+        # and get the row with the maximum "created" timestamp per group
+        max_created_per_app = df.groupby(
+            group_by
+        )['created'].max().reset_index()
 
-        # join the original dataframe with the grouped data to get the full row with the maximum "created" per application
-        return pd.merge(df, max_created_per_app, on=[group_by, 'created'], how='inner')
+        # join the original dataframe with the grouped data
+        # to get the full row with the maximum "created" per application
+        return pd.merge(
+            df,
+            max_created_per_app,
+            on=[group_by, 'created'],
+            how='inner'
+        )
 
     @staticmethod
-    def parse_results(data, recent, parser_type):
+    def parse_results(data: List, recent: bool, parser_type: int) -> Any:
+        """Parse the results.
+
+        Args:
+            data (List): _description_
+            recent (bool): _description_
+            parser_type (int): _description_
+
+        Returns:
+            Any: _description_
+        """
         df = Store.to_dataframe(data, protobuf_parsers=PARSERS[parser_type])
         LOG.debug(df)
         if len(df) == 0:
@@ -87,12 +146,14 @@ class RouterUtils:
 
         return json.loads(df.to_json(orient="records"))
 
-
     @staticmethod
-    def get_user_token(res: Response, credential: HTTPAuthorizationCredentials=Depends(
-                HTTPBearer(auto_error=False)
-            )):
-        
+    def get_user_token(
+        res: Response,
+        credential: HTTPAuthorizationCredentials = Depends(
+            HTTPBearer(auto_error=False)
+        )
+    ) -> None:
+        """Work in progress."""
         return
 
         if credential is None:
@@ -119,26 +180,26 @@ class RouterUtils:
         return decoded_token
 
 
-    @staticmethod
-    def get_config() -> None:
-        scopes = [
-            "https://www.googleapis.com/auth/firebase.remoteconfig"
-        ]
+def get_config() -> None:
+    """Get the feature flag config."""
+    scopes = [
+        "https://www.googleapis.com/auth/firebase.remoteconfig"
+    ]
 
-        # Authenticate a credential with the service account
-        credentials = service_account.Credentials.from_service_account_file(
-            os.environ['FIREBASE_CREDENTIALS_PATH'], scopes=scopes)
+    # Authenticate a credential with the service account
+    credentials = service_account.Credentials.from_service_account_file(
+        os.environ['FIREBASE_CREDENTIALS_PATH'], scopes=scopes)
 
-        authed_session = AuthorizedSession(credentials)
-        # https://firebase.google.com/docs/reference/remote-config/rest/v1/projects/getRemoteConfig
-        url = f"https://firebaseremoteconfig.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/remoteConfig"
-        response = authed_session.get(url)
-        response = json.loads(response.content.decode('utf-8'))
-        response = response.get("parameters")
+    authed_session = AuthorizedSession(credentials)
+    # https://firebase.google.com/docs/reference/remote-config/rest/v1/projects/getRemoteConfig
+    url = f"https://firebaseremoteconfig.googleapis.com/v1/projects/{FIREBASE_PROJECT_ID}/remoteConfig"  # noqa: E501
+    response = authed_session.get(url)
+    response = json.loads(response.content.decode('utf-8'))
+    response = response.get("parameters")
 
-        feature_flags = []
-        for flag in response.keys():
-            if response.get(flag).get('valueType') == 'BOOLEAN':
-                default_value = bool(response.get(flag).get('defaultValue').get('value'))
+    # feature_flags = []
+    # for flag in response.keys():
+    #     if response.get(flag).get('valueType') == 'BOOLEAN':
+    #         default_value = bool(response.get(flag).get('defaultValue').get('value'))  # noqa: E501
 
-        print(response)
+    print(response)

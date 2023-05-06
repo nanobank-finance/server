@@ -1,6 +1,6 @@
 """Vouch Routes."""
 import logging
-from typing import Self
+from typing import Any, List, Self, Union
 
 from bizlogic.vouch import VouchReader, VouchWriter
 
@@ -9,7 +9,7 @@ from fastapi import Depends, FastAPI
 from ipfsclient.ipfs import Ipfs
 
 from src.schemas import SuccessOrFailureResponse
-from src.utils import ParserType, get_user_token
+from src.utils import ParserType
 from src.utils import RouterUtils
 
 
@@ -32,7 +32,10 @@ class VouchRouter():
         # Loan application endpoints
 
         @app.post("/vouch", response_model=SuccessOrFailureResponse)
-        async def submit_vouch(vouchee: str, user = Depends(get_user_token)):
+        async def submit_vouch(
+            vouchee: str,
+            user: Any = Depends(RouterUtils.get_user_token)
+        ) -> SuccessOrFailureResponse:
             voucher = "123"  # TODO: get from KYC
             try:
                 vouch_writer = VouchWriter(ipfsclient, voucher, vouchee)
@@ -48,13 +51,22 @@ class VouchRouter():
                     error_message=str(e),
                     error_type=type(e).__name__
                 )
-        
-        @app.get("/vouch")
-        async def get_all_vouches(recent: bool = False, user = Depends(get_user_token)):
-            borrower = "123"  # TODO: get from KYC
+
+        @app.get(
+            "/vouch",
+            response_model=Union[List, SuccessOrFailureResponse]
+        )
+        async def get_all_vouches(
+            recent: bool = False,
+            user: Any = Depends(RouterUtils.get_user_token)
+        ) -> Union[List, SuccessOrFailureResponse]:
             try:
                 results = vouch_reader.get_all_vouches()
-                return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
+                return RouterUtils.parse_results(
+                    results,
+                    recent,
+                    ParserType.VOUCH
+                )
             except Exception as e:
                 LOG.exception(e)
                 return SuccessOrFailureResponse(
@@ -62,10 +74,17 @@ class VouchRouter():
                     error_message=str(e),
                     error_type=type(e).__name__
                 )
-        
-        @app.get("/vouch/user/self")
-        async def get_my_vouchers(perspective: str = "voucher", recent: bool = False, user = Depends(get_user_token)):
-            assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)
+
+        @app.get(
+            "/vouch/user/self",
+            response_model=Union[List, SuccessOrFailureResponse]
+        )
+        async def get_my_vouchers(
+            perspective: str = "voucher",
+            recent: bool = False,
+            user: Any = Depends(RouterUtils.get_user_token)
+        ) -> Union[List, SuccessOrFailureResponse]:
+            assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
             try:
                 if perspective == "voucher":
@@ -73,7 +92,11 @@ class VouchRouter():
                 elif perspective == "vouchee":
                     results = vouch_reader.get_vouchees_for_borrower(borrower)
 
-                return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
+                return RouterUtils.parse_results(
+                    results,
+                    recent,
+                    ParserType.VOUCH
+                )
             except Exception as e:
                 LOG.exception(e)
                 return SuccessOrFailureResponse(
@@ -81,17 +104,29 @@ class VouchRouter():
                     error_message=str(e),
                     error_type=type(e).__name__
                 )
-            
-        @app.get("/vouch/user/other")
-        async def get_their_vouchers(them: str, perspective: str = "voucher", recent: bool = False, user = Depends(get_user_token)):
-            assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)
+
+        @app.get(
+            "/vouch/user/other",
+            response_model=Union[List, SuccessOrFailureResponse]
+        )
+        async def get_their_vouchers(
+            them: str,
+            perspective: str = "voucher",
+            recent: bool = False,
+            user: Any = Depends(RouterUtils.get_user_token)
+        ) -> Union[List, SuccessOrFailureResponse]:
+            assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             try:
                 if perspective == "voucher":
                     results = vouch_reader.get_vouchers_for_borrower(them)
                 elif perspective == "vouchee":
                     results = vouch_reader.get_vouchees_for_borrower(them)
 
-                return RouterUtils.parse_results(results, recent, ParserType.VOUCH)
+                return RouterUtils.parse_results(
+                    results,
+                    recent,
+                    ParserType.VOUCH
+                )
             except Exception as e:
                 LOG.exception(e)
                 return SuccessOrFailureResponse(

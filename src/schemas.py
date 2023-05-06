@@ -1,5 +1,6 @@
 """Response type schemas."""
 from typing import Union
+
 from pydantic import BaseModel
 
 

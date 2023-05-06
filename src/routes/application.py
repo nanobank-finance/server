@@ -65,12 +65,12 @@ class LoanApplicationRouter():
 
         @app.get(
             "/loan/application",
-            response_model=Union[List, SuccessOrFailureResponse]
+            response_model=List
         )
         async def get_all_loan_applications(
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
-        ) -> Union[List, SuccessOrFailureResponse]:
+        ) -> List:
             """Get all loan applications.
 
             Args:
@@ -78,31 +78,23 @@ class LoanApplicationRouter():
                     Defaults to False.
 
             Returns:
-                Union[List, SuccessOrFailureResponse]: _description_
+                List: _description_
             """
-            try:
-                results = loan_application_reader.get_open_loan_applications()
-                return RouterUtils.parse_results(
-                    results,
-                    recent,
-                    ParserType.LOAN_APPLICATION
-                )
-            except Exception as e:
-                LOG.exception(e)
-                return SuccessOrFailureResponse(
-                    success=False,
-                    error_message=str(e),
-                    error_type=type(e).__name__
-                )
+            results = loan_application_reader.get_open_loan_applications()
+            return RouterUtils.parse_results(
+                results,
+                recent,
+                ParserType.LOAN_APPLICATION
+            )
 
         @app.get(
             "/loan/application/user/self",
-            response_model=Union[List, SuccessOrFailureResponse]
+            response_model=List
         )
         async def get_my_loan_applications(
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
-        ) -> Union[List, SuccessOrFailureResponse]:
+        ) -> List:
             """Get my loan applications.
 
             Args:
@@ -110,48 +102,31 @@ class LoanApplicationRouter():
                     Defaults to False.
 
             Returns:
-                Union[List, SuccessOrFailureResponse]: _description_
+                List: _description_
             """
             borrower = "123"  # TODO: get from KYC
-
-            try:
-                results = loan_application_reader.get_loan_applications_for_borrower(borrower)  # noqa: E501
-                return RouterUtils.parse_results(
-                    results,
-                    recent,
-                    ParserType.LOAN_APPLICATION
-                )
-            except Exception as e:
-                LOG.exception(e)
-                return SuccessOrFailureResponse(
-                    success=False,
-                    error_message=str(e),
-                    error_type=type(e).__name__
-                )
+            results = loan_application_reader.get_loan_applications_for_borrower(borrower)  # noqa: E501
+            return RouterUtils.parse_results(
+                results,
+                recent,
+                ParserType.LOAN_APPLICATION
+            )
 
         @app.get(
             "/loan/application/user/other",
-            response_model=Union[List, SuccessOrFailureResponse]
+            response_model=List
         )
         async def get_their_loan_applications(
             them: str,
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
-        ) -> Union[List, SuccessOrFailureResponse]:
-            try:
-                results = loan_application_reader.get_loan_applications_for_borrower(them)  # noqa: E501
-                return RouterUtils.parse_results(
-                    results,
-                    recent,
-                    ParserType.LOAN_APPLICATION
-                )
-            except Exception as e:
-                LOG.exception(e)
-                return SuccessOrFailureResponse(
-                    success=False,
-                    error_message=str(e),
-                    error_type=type(e).__name__
-                )
+        ) -> List:
+            results = loan_application_reader.get_loan_applications_for_borrower(them)  # noqa: E501
+            return RouterUtils.parse_results(
+                results,
+                recent,
+                ParserType.LOAN_APPLICATION
+            )
 
         @app.delete(
             "/loan/application/{application}",

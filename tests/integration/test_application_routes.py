@@ -51,3 +51,71 @@ def test_get_all_loan_applications(
 
     # Then
     assert response.status_code == 200
+
+
+def test_get_my_loan_applications(
+        user_token: Dict[str, str],
+        client: TestClient) -> None:
+    # Given
+    recent = False
+
+    # When
+    response = client.get(
+        f"{base_url}/loan/application/user/self?recent={recent}",
+        headers=user_token
+    )
+
+    # Then
+    assert response.status_code == 200
+
+
+def test_get_their_loan_applications(
+        user_token: Dict[str, str],
+        client: TestClient) -> None:
+    # Given
+    recent = False
+    them = 123
+
+    # When
+    response = client.get(
+        f"{base_url}/loan/application/user/other?them={them}&recent={recent}",
+        headers=user_token
+    )
+
+    # Then
+    assert response.status_code == 200
+
+
+def test_withdraw_loan_application(
+        user_token: Dict[str, str],
+        client: TestClient) -> None:
+    # Given
+    asking = 1000
+    recent = True
+
+    # When
+
+    # create the loan application
+    response = client.post(
+        f"{base_url}/loan/application?asking={asking}",
+        headers=user_token
+    )
+    assert response.status_code == 200
+
+    # get the loan application
+    response = client.get(
+        f"{base_url}/loan/application/user/self?recent={recent}",
+        headers=user_token
+    )
+    assert response.status_code == 200
+
+    application = response.json()[0]["application"]
+
+    # delete the loan application
+    response = client.delete(
+        f"{base_url}/loan/application/{application}",
+        headers=user_token
+    )
+
+    # Then
+    assert response.status_code == 200

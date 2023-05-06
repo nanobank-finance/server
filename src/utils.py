@@ -3,7 +3,7 @@ import datetime
 import json
 import logging
 import os
-from typing import Any, List
+from typing import List
 
 from fastapi import Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -124,7 +124,7 @@ class RouterUtils:
         )
 
     @staticmethod
-    def parse_results(data: List, recent: bool, parser_type: int) -> Any:
+    def parse_results(data: List, recent: bool, parser_type: int) -> dict:
         """Parse the results.
 
         Args:

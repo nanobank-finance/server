@@ -1,12 +1,8 @@
-from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
-
-from src.routes.vouch import VouchRouter
-
 from tests import client
 
 
-def test_submit_vouch():
+def test_submit_vouch() -> None:
+    """Test /vouch POST endpoint."""
     # Given
     vouchee = "123"
 
@@ -15,10 +11,11 @@ def test_submit_vouch():
 
     # Assert
     assert response.status_code == 200
-    assert response.json()["success"] == True
+    assert response.json()["success"] is True
 
 
-def test_get_all_vouches():
+def test_get_all_vouches() -> None:
+    """Test /vouch GET endpoint."""
     # Act
     response = client.get("/vouch")
 

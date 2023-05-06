@@ -1,6 +1,6 @@
 """Application Routes."""
 import logging
-from typing import Any, List, Self, Union
+from typing import List, Self, Union
 
 from bizlogic.application import LoanApplicationReader, LoanApplicationWriter
 
@@ -34,7 +34,7 @@ class LoanApplicationRouter():
         @app.post("/loan/application", response_model=SuccessOrFailureResponse)
         async def submit_loan_application(
             asking: int,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
             """Create a loan application.
 
@@ -69,7 +69,7 @@ class LoanApplicationRouter():
         )
         async def get_all_loan_applications(
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             """Get all loan applications.
 
@@ -101,7 +101,7 @@ class LoanApplicationRouter():
         )
         async def get_my_loan_applications(
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             """Get my loan applications.
 
@@ -136,7 +136,7 @@ class LoanApplicationRouter():
         async def get_their_loan_applications(
             them: str,
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             try:
                 results = loan_application_reader.get_loan_applications_for_borrower(them)  # noqa: E501
@@ -159,7 +159,7 @@ class LoanApplicationRouter():
         )
         async def withdraw_loan_application(
             application: str,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
             borrower = "123"  # TODO: get from KYC
 

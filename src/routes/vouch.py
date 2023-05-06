@@ -1,6 +1,6 @@
 """Vouch Routes."""
 import logging
-from typing import Any, List, Self, Union
+from typing import List, Self, Union
 
 from bizlogic.vouch import VouchReader, VouchWriter
 
@@ -34,7 +34,7 @@ class VouchRouter():
         @app.post("/vouch", response_model=SuccessOrFailureResponse)
         async def submit_vouch(
             vouchee: str,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
             voucher = "123"  # TODO: get from KYC
             try:
@@ -58,7 +58,7 @@ class VouchRouter():
         )
         async def get_all_vouches(
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             try:
                 results = vouch_reader.get_all_vouches()
@@ -82,7 +82,7 @@ class VouchRouter():
         async def get_my_vouchers(
             perspective: str = "voucher",
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
@@ -113,7 +113,7 @@ class VouchRouter():
             them: str,
             perspective: str = "voucher",
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             try:

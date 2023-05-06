@@ -1,6 +1,6 @@
 """Loan Routes."""
 import logging
-from typing import Any, List, Self, Union
+from typing import List, Self, Union
 
 from bizlogic.loan.reader import LoanReader
 from bizlogic.loan.repayment import PaymentSchedule
@@ -41,7 +41,7 @@ class LoanRouter():
         )
         async def get_open_loans(
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             try:
                 results = loan_reader.query_for_status(
@@ -66,7 +66,7 @@ class LoanRouter():
         )
         async def get_accepted_loans(
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             try:
                 results = loan_reader.query_for_status(LoanStatusType.ACCEPTED)
@@ -90,7 +90,7 @@ class LoanRouter():
         async def get_my_open_loans(
             perspective: str = "borrower",
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
@@ -121,7 +121,7 @@ class LoanRouter():
         async def get_my_accepted_loans(
             perspective: str = "borrower",
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
@@ -152,7 +152,7 @@ class LoanRouter():
         async def get_my_loans(
             perspective: str = "borrower",
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
@@ -183,7 +183,7 @@ class LoanRouter():
             them: str,
             perspective: str = "borrower",
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             try:
@@ -212,7 +212,7 @@ class LoanRouter():
         async def get_loan_details(
             loan_id: str,
             recent: bool = False,
-            user: Any = Depends(RouterUtils.get_user_token)
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> Union[List, SuccessOrFailureResponse]:
             try:
                 results = loan_reader.query_for_loan(loan_id)
@@ -237,7 +237,7 @@ class LoanRouter():
                 duration: int,
                 payments: int,
                 expiry: int,
-                user: Any = Depends(RouterUtils.get_user_token)
+                user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
             lender = "123"  # TODO: get from KYC
             try:

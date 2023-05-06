@@ -1,11 +1,12 @@
 """Vouch Routes."""
 import logging
-
-from fastapi import Depends
-
-from ipfsclient.ipfs import Ipfs
+from typing import Self
 
 from bizlogic.vouch import VouchReader, VouchWriter
+
+from fastapi import Depends, FastAPI
+
+from ipfsclient.ipfs import Ipfs
 
 from src.schemas import SuccessOrFailureResponse
 from src.utils import ParserType, get_user_token
@@ -17,9 +18,14 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class VouchRouter():
+    """Vouch Router."""
 
-    def __init__(self, app):
+    def __init__(self: Self, app: FastAPI) -> None:
+        """Add routes for vouches.
 
+        Args:
+            app (FastAPI): Routes will be added to this app.
+        """
         ipfsclient = Ipfs()
         vouch_reader = VouchReader(ipfsclient)
 

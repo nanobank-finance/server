@@ -6,11 +6,10 @@ from fastapi.testclient import TestClient
 
 from src.main import app
 
-client = TestClient(app)
 base_url = "http://127.0.0.1:8000"
 
 
-@pytest.fixture()
+@pytest.fixture(scope='session')
 def client():
     with TestClient(app, base_url=base_url) as client:
         yield client
@@ -21,7 +20,9 @@ def user_token() -> Dict[str, str]:
     return {"access_token": "your_access_token"}
 
 
-def test_submit_loan_application(user_token, client):
+def test_submit_loan_application(
+        user_token: Dict[str, str],
+        client: TestClient) -> None:
     # Given
     asking = 1000
 
@@ -29,22 +30,21 @@ def test_submit_loan_application(user_token, client):
     response = client.post(f"{base_url}/loan/application?asking={asking}", headers=user_token)
 
     # Then
-    print(response.__dict__)
     assert response.status_code == 200
     assert response.json()["success"] == True
 
 
-# @pytest.mark.asyncio
-# async def test_get_all_loan_applications(client: AsyncClient, user_token: Dict[str, str]):
-#     # Given
-#     recent = False
+def test_get_all_loan_applications(
+        user_token: Dict[str, str],
+        client: TestClient) -> None:
+    # Given
+    recent = False
 
-#     # When
-#     response = await client.get(f"{base_url}/loan/application", params={"recent": recent}, headers=user_token)
+    # When
+    response = client.get(f"{base_url}/loan/application?recent={recent}", headers=user_token)
 
-#     # Then
-#     assert response.status_code == 200
-#     assert "results" in response.json()
+    # Then
+    assert response.status_code == 200
 
 
 # @pytest.mark.asyncio

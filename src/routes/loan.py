@@ -91,6 +91,29 @@ class LoanRouter():
             )
 
         @app.get(
+            "/loans/user/their/open",
+            response_model=List
+        )
+        async def get_their_open_loans(
+            them: int,
+            perspective: str = "borrower",
+            recent: bool = False,
+            user: str = Depends(RouterUtils.get_user_token)
+        ) -> List:
+            assert perspective in ["lender", "borrower"]
+            results = loan_reader.query_for_status(
+                LoanStatusType.PENDING_ACCEPTANCE,
+                index={
+                    perspective: them
+                }
+            )
+            return RouterUtils.parse_results(
+                results,
+                recent,
+                ParserType.LOAN
+            )
+
+        @app.get(
             "/loans/user/self/accepted",
             response_model=List
         )
@@ -105,6 +128,29 @@ class LoanRouter():
                 LoanStatusType.ACCEPTED,
                 index={
                     perspective: borrower
+                }
+            )
+            return RouterUtils.parse_results(
+                results,
+                recent,
+                ParserType.LOAN
+            )
+        
+        @app.get(
+            "/loans/user/their/accepted",
+            response_model=List
+        )
+        async def get_their_accepted_loans(
+            them: int,
+            perspective: str = "borrower",
+            recent: bool = False,
+            user: str = Depends(RouterUtils.get_user_token)
+        ) -> List:
+            assert perspective in ["lender", "borrower"]
+            results = loan_reader.query_for_status(
+                LoanStatusType.ACCEPTED,
+                index={
+                    perspective: them
                 }
             )
             return RouterUtils.parse_results(
@@ -218,6 +264,14 @@ class LoanRouter():
                     error_type=type(e).__name__
                 )
 
-        # TODO: accept loan offer
+        @app.post("/loan/accept", response_model=SuccessOrFailureResponse)
+        async def accept_loan(
+            loan_id: str,
+            user: str = Depends(RouterUtils.get_user_token)
+        ) -> SuccessOrFailureResponse:
+            # read the loan
+            results = loan_reader.query_for_loan(loan_id)
+            print(results)
+
 
         # TODO: make payment

@@ -137,6 +137,7 @@ class RouterUtils:
         Returns:
             Any: _description_
         """
+        LOG.debug(data)
         df = Store.to_dataframe(data, protobuf_parsers=PARSERS[parser_type])
         LOG.debug(df)
         if len(df) == 0:

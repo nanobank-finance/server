@@ -9,9 +9,7 @@ from fastapi import Depends, FastAPI
 from ipfsclient.ipfs import Ipfs
 
 from src.schemas import SuccessOrFailureResponse
-from src.utils import ParserType
-from src.utils import RouterUtils
-
+from src.utils import ParserType, RouterUtils
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -121,6 +119,16 @@ class LoanApplicationRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get their loan applications.
+
+            Args:
+                them (str): The user whose applications to get.
+                recent (bool, optional): Use CDC or only get the most recent.
+                    Defaults to False.
+
+            Returns:
+                List: _description_
+            """
             results = loan_application_reader.get_loan_applications_for_borrower(them)  # noqa: E501
             return RouterUtils.parse_results(
                 results,
@@ -136,6 +144,14 @@ class LoanApplicationRouter():
             application: str,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
+            """Withdraw a loan application.
+
+            Args:
+                application (str): The application to withdraw.
+
+            Returns:
+                SuccessOrFailureResponse: `success=True` when successful.
+            """
             borrower = "123"  # TODO: get from KYC
 
             try:

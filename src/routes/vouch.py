@@ -9,9 +9,7 @@ from fastapi import Depends, FastAPI
 from ipfsclient.ipfs import Ipfs
 
 from src.schemas import SuccessOrFailureResponse
-from src.utils import ParserType
-from src.utils import RouterUtils
-
+from src.utils import ParserType, RouterUtils
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -36,6 +34,14 @@ class VouchRouter():
             vouchee: str,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
+            """Create a vouch.
+
+            Args:
+                vouchee (str): The user to vouch for.
+
+            Returns:
+                SuccessOrFailureResponse: `success=True` when successful.
+            """
             voucher = "123"  # TODO: get from KYC
             try:
                 vouch_writer = VouchWriter(ipfsclient, voucher, vouchee)
@@ -60,6 +66,14 @@ class VouchRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all vouches.
+
+            Args:
+                recent (bool, optional): Whether to only get recent vouches. Defaults to False.
+            
+            Returns:
+                List: List of vouches.
+            """
             results = vouch_reader.get_all_vouches()
             return RouterUtils.parse_results(
                 results,
@@ -76,6 +90,15 @@ class VouchRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all vouches for the current user.
+
+            Args:
+                perspective (str, optional): Whether to get vouchers or vouchees. Defaults to "voucher".
+                recent (bool, optional): Whether to only get recent vouches. Defaults to False.
+
+            Returns:
+                List: List of vouches.
+            """
             assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
             if perspective == "voucher":
@@ -99,6 +122,16 @@ class VouchRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all vouches for the given user.
+
+            Args:
+                them (str): The user to get vouches for.
+                perspective (str, optional): Whether to get vouchers or vouchees. Defaults to "voucher".
+                recent (bool, optional): Whether to only get recent vouches. Defaults to False.
+
+            Returns:
+                List: List of vouches.
+            """
             assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             if perspective == "voucher":
                 results = vouch_reader.get_vouchers_for_borrower(them)

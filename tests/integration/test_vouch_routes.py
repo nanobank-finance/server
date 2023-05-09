@@ -4,7 +4,7 @@ from tests import client
 def test_submit_vouch() -> None:
     """Test /vouch POST endpoint."""
     # Given
-    vouchee = "123"
+    vouchee = "321"
 
     # Act
     response = client.post(f"/vouch?vouchee={vouchee}")

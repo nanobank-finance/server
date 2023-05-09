@@ -14,8 +14,7 @@ from ipfsclient.ipfs import Ipfs
 import pandas as pd
 
 from src.schemas import SuccessOrFailureResponse
-from src.utils import ParserType
-from src.utils import RouterUtils
+from src.utils import ParserType, RouterUtils
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -43,6 +42,16 @@ class LoanRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all open loans.
+
+            Args:
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+                user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
+
+            Returns:
+                List: List of loans.
+            """
             results = loan_reader.query_for_status(
                 LoanStatusType.PENDING_ACCEPTANCE
             )
@@ -60,6 +69,16 @@ class LoanRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all accepted loans.
+
+            Args:
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+                user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
+
+            Returns:
+                List: List of loans.
+            """
             results = loan_reader.query_for_status(LoanStatusType.ACCEPTED)
             return RouterUtils.parse_results(
                 results,
@@ -76,6 +95,18 @@ class LoanRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all open loans for the user.
+
+            Args:
+                perspective (str, optional): The perspective of the user.
+                    Defaults to "borrower".
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+                user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
+
+            Returns:
+                List: List of loans.
+            """
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
             results = loan_reader.query_for_status(
@@ -100,6 +131,19 @@ class LoanRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all open loans for the user.
+
+            Args:
+                them (int): The user ID of the user.
+                perspective (str, optional): The perspective of the user.
+                    Defaults to "borrower".
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+                user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
+
+            Returns:
+                List: List of loans.
+            """
             assert perspective in ["lender", "borrower"]
             results = loan_reader.query_for_status(
                 LoanStatusType.PENDING_ACCEPTANCE,
@@ -122,6 +166,18 @@ class LoanRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all accepted loans for the user.
+
+            Args:
+                perspective (str, optional): The perspective of the user.
+                    Defaults to "borrower".
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+                user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
+
+            Returns:
+                List: List of loans.
+            """
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
             results = loan_reader.query_for_status(
@@ -146,6 +202,19 @@ class LoanRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all accepted loans for the user.
+
+            Args:
+                them (int): The user ID of the user.
+                perspective (str, optional): The perspective of the user.
+                    Defaults to "borrower".
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+                user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
+
+            Returns:
+                List: List of loans.
+            """
             assert perspective in ["lender", "borrower"]
             results = loan_reader.query_for_status(
                 LoanStatusType.ACCEPTED,
@@ -168,6 +237,18 @@ class LoanRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all loans for the user.
+
+            Args:
+                perspective (str, optional): The perspective of the user.
+                    Defaults to "borrower".
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+                user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
+
+            Returns:
+                List: List of loans.
+            """
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
             if perspective == "borrower":
@@ -191,6 +272,19 @@ class LoanRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all loans for the user.
+
+            Args:
+                them (str): The user ID of the user.
+                perspective (str, optional): The perspective of the user.
+                    Defaults to "borrower".
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+                user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
+                
+            Returns:
+                List: List of loans.
+            """
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             if perspective == "borrower":
                 results = loan_reader.query_for_borrower(them)
@@ -212,6 +306,16 @@ class LoanRouter():
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> List:
+            """Get all loans for the user.
+
+            Args:
+                loan_id (str): The loan ID of the loan.
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+
+            Returns:
+                List: List of loans.
+            """
             results = loan_reader.query_for_loan(loan_id)
             return RouterUtils.parse_results(
                 results,
@@ -229,6 +333,19 @@ class LoanRouter():
                 expiry: int,
                 user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
+            """Create a loan offer.
+
+            Args:
+                borrower (str): The borrower ID.
+                principal (int): The principal amount.
+                interest (float): The interest rate.
+                duration (int): The duration of the loan.
+                payments (int): The number of payments.
+                expiry (int): The expiry of the loan.
+            
+            Returns:
+                SuccessOrFailureResponse: The response.
+            """
             lender = "123"  # TODO: get from KYC
             try:
 
@@ -269,6 +386,14 @@ class LoanRouter():
             loan_id: str,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
+            """Accept a loan.
+
+            Args:
+                loan_id (str): The loan ID.
+
+            Returns:
+                SuccessOrFailureResponse: The response.
+            """
             # read the loan
             results = loan_reader.query_for_loan(loan_id)
             print(results)

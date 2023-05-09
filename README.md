@@ -16,3 +16,4 @@ http://127.0.0.1:8000/docs#/ or http://127.0.0.1:8000/redoc
 ## Build, run tests, and run linter:
 
 `nox --verbose`
+To only run tests: `pytest --cov=bizlogic --log-cli-level=debug`  

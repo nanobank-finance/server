@@ -3,13 +3,14 @@ import logging
 from typing import List, Self, Union
 
 from bizlogic.application import LoanApplicationReader, LoanApplicationWriter
+from bizlogic.utils import ParserType
 
 from fastapi import Depends, FastAPI
 
 from ipfsclient.ipfs import Ipfs
 
 from src.schemas import SuccessOrFailureResponse
-from src.utils import ParserType, RouterUtils
+from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)

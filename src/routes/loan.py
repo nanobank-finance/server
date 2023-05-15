@@ -6,6 +6,7 @@ from bizlogic.loan.reader import LoanReader
 from bizlogic.loan.repayment import PaymentSchedule
 from bizlogic.loan.status import LoanStatusType
 from bizlogic.loan.writer import LoanWriter
+from bizlogic.utils import ParserType
 
 from fastapi import Depends, FastAPI
 
@@ -14,7 +15,7 @@ from ipfsclient.ipfs import Ipfs
 import pandas as pd
 
 from src.schemas import SuccessOrFailureResponse
-from src.utils import ParserType, RouterUtils
+from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -31,8 +32,6 @@ class LoanRouter():
         """
         ipfsclient = Ipfs()
         loan_reader = LoanReader(ipfsclient)
-
-        # Loan endpoints
 
         @app.get(
             "/loans/open",

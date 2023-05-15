@@ -75,12 +75,7 @@ class VouchRouter():
             Returns:
                 List: List of vouches.
             """
-            results = vouch_reader.get_all_vouches()
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.VOUCH
-            )
+            return vouch_reader.get_all_vouches()
 
         @app.get(
             "/vouch/user/self",
@@ -103,15 +98,9 @@ class VouchRouter():
             assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
             if perspective == "voucher":
-                results = vouch_reader.get_vouchers_for_borrower(borrower)
+                return vouch_reader.query_vouches(voucher=borrower)
             elif perspective == "vouchee":
-                results = vouch_reader.get_vouchees_for_borrower(borrower)
-
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.VOUCH
-            )
+                return vouch_reader.query_vouches(vouchee=borrower)
 
         @app.get(
             "/vouch/user/other",

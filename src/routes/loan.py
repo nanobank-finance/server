@@ -6,7 +6,7 @@ from bizlogic.loan.reader import LoanReader
 from bizlogic.loan.repayment import PaymentSchedule
 from bizlogic.loan.status import LoanStatusType
 from bizlogic.loan.writer import LoanWriter
-from bizlogic.utils import ParserType
+from bizlogic.utils import ParserType, Utils
 
 from fastapi import Depends, FastAPI
 
@@ -54,7 +54,7 @@ class LoanRouter():
             results = loan_reader.query_for_status(
                 LoanStatusType.PENDING_ACCEPTANCE
             )
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -79,7 +79,7 @@ class LoanRouter():
                 List: List of loans.
             """
             results = loan_reader.query_for_status(LoanStatusType.ACCEPTED)
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -114,7 +114,7 @@ class LoanRouter():
                     perspective: borrower
                 }
             )
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -150,7 +150,7 @@ class LoanRouter():
                     perspective: them
                 }
             )
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -185,7 +185,7 @@ class LoanRouter():
                     perspective: borrower
                 }
             )
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -221,7 +221,7 @@ class LoanRouter():
                     perspective: them
                 }
             )
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -255,7 +255,7 @@ class LoanRouter():
             elif perspective == "lender":
                 results = loan_reader.query_for_lender(borrower)
 
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -290,7 +290,7 @@ class LoanRouter():
             elif perspective == "lender":
                 results = loan_reader.query_for_lender(them)
 
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -316,7 +316,7 @@ class LoanRouter():
                 List: List of loans.
             """
             results = loan_reader.query_for_loan(loan_id)
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -348,7 +348,7 @@ class LoanRouter():
             lender = "123"  # TODO: get from KYC
             try:
 
-                offer_expiry_date = RouterUtils.nanosecond_epoch_to_datetime(expiry)  # noqa: E501
+                offer_expiry_date = Utils.nanosecond_epoch_to_datetime(expiry)  # noqa: E501
 
                 payment_schedule = PaymentSchedule.create_payment_schedule(
                     amount=principal,

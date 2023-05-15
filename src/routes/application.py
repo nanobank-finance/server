@@ -3,7 +3,7 @@ import logging
 from typing import List, Self, Union
 
 from bizlogic.application import LoanApplicationReader, LoanApplicationWriter
-from bizlogic.utils import ParserType
+from bizlogic.utils import ParserType, Utils
 
 from fastapi import Depends, FastAPI
 
@@ -80,7 +80,7 @@ class LoanApplicationRouter():
                 List: _description_
             """
             results = loan_application_reader.get_open_loan_applications()
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN_APPLICATION
@@ -105,7 +105,7 @@ class LoanApplicationRouter():
             """
             borrower = "123"  # TODO: get from KYC
             results = loan_application_reader.get_loan_applications_for_borrower(borrower)  # noqa: E501
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN_APPLICATION
@@ -131,7 +131,7 @@ class LoanApplicationRouter():
                 List: _description_
             """
             results = loan_application_reader.get_loan_applications_for_borrower(them)  # noqa: E501
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN_APPLICATION

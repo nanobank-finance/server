@@ -3,6 +3,7 @@ import logging
 from typing import List, Self, Union
 
 from bizlogic.vouch import VouchReader, VouchWriter
+from bizlogic.utils import ParserType, Utils
 
 from fastapi import Depends, FastAPI
 
@@ -75,7 +76,7 @@ class VouchRouter():
                 List: List of vouches.
             """
             results = vouch_reader.get_all_vouches()
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.VOUCH
@@ -106,7 +107,7 @@ class VouchRouter():
             elif perspective == "vouchee":
                 results = vouch_reader.get_vouchees_for_borrower(borrower)
 
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.VOUCH
@@ -138,7 +139,7 @@ class VouchRouter():
             elif perspective == "vouchee":
                 results = vouch_reader.get_vouchees_for_borrower(them)
 
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.VOUCH

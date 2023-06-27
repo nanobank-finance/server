@@ -221,11 +221,8 @@ class LoanRouter():
                     perspective: them
                 }
             )
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+
+            return results.to_json(orient="records")
 
         @app.get(
             "/loans/user/self",
@@ -255,11 +252,7 @@ class LoanRouter():
             elif perspective == "lender":
                 results = loan_reader.query_for_lender(borrower)
 
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return results.to_json(orient="records")
 
         @app.get(
             "/loans/user/other",
@@ -290,11 +283,7 @@ class LoanRouter():
             elif perspective == "lender":
                 results = loan_reader.query_for_lender(them)
 
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return results.to_json(orient="records")
 
         @app.get(
             "/loan",
@@ -315,12 +304,7 @@ class LoanRouter():
             Returns:
                 List: List of loans.
             """
-            results = loan_reader.query_for_loan(loan_id)
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return loan_reader.query_for_loan(loan_id).to_json(orient="records")
 
         @app.post("/loan", response_model=SuccessOrFailureResponse)
         async def create_loan_offer(

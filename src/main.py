@@ -14,6 +14,7 @@ import src.utils
 from src.routes.application import LoanApplicationRouter
 from src.routes.loan import LoanRouter
 from src.routes.vouch import VouchRouter
+from src.routes.sumsub import SumsubRouter
 
 app = FastAPI()
 
@@ -61,6 +62,7 @@ async def startup_router() -> None:
     LoanApplicationRouter(app)
     LoanRouter(app)
     VouchRouter(app)
+    SumsubRouter(app)
 
 
 @app.on_event("startup")

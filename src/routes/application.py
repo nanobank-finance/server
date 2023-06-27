@@ -79,7 +79,7 @@ class LoanApplicationRouter():
             Returns:
                 List: _description_
             """
-            return loan_application_reader.query_loan_applications(open_only=True)
+            return loan_application_reader.query_loan_applications(open_only=True).to_json(orient="records")
 
         @app.get(
             "/loan/application/user/self",
@@ -99,7 +99,7 @@ class LoanApplicationRouter():
                 List: _description_
             """
             borrower = "123"  # TODO: get from KYC
-            return loan_application_reader.query_loan_applications(borrower=borrower)  # noqa: E501
+            return loan_application_reader.query_loan_applications(borrower=borrower).to_json(orient="records")  # noqa: E501
 
         @app.get(
             "/loan/application/user/other",
@@ -120,7 +120,7 @@ class LoanApplicationRouter():
             Returns:
                 List: _description_
             """
-            return loan_application_reader.query_loan_applications(borrower=them)  # noqa: E501
+            return loan_application_reader.query_loan_applications(borrower=them).to_json(orient="records")  # noqa: E501
 
         @app.delete(
             "/loan/application/{application}",

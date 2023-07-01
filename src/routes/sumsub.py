@@ -5,6 +5,7 @@ from typing import Self
 
 from src.schemas import SuccessOrFailureResponse
 from src.utils import RouterUtils
+from src.sumsub import create_applicant, get_applicant_status, get_access_token
 
 
 class SumsubRouter():
@@ -24,8 +25,22 @@ class SumsubRouter():
             Returns:
                 SuccessOrFailureResponse: `success=True` when successful.
             """
+            # check if user id is "locked" in firestore
             pass
-            
+
+            # "lock" user id mapping to prevent race conditions
+            pass
+
+            # get applicant id corresponding to user from firestore
+            pass
+
+            # if the applicant id does not exist, create a new one in sumsub
+            # and store the id in firestore
+            pass
+
+            # query sumsub for the status of the applicant id
+            pass
+
         @app.post("/onboard/start", response_model=SuccessOrFailureResponse)
         async def start_onboarding(
             user: str = Depends(RouterUtils.get_user_token)

@@ -8,6 +8,7 @@ bizlogic
 ipfsclient
 ipfskvs
 httpx
+tenacity
 
 # for tests and linting
 nox

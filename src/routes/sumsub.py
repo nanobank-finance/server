@@ -59,6 +59,31 @@ class SumsubRouter():
                 transaction.rollback()
                 raise HTTPException(status_code=400, detail=str(e))
 
+        @app.get("/onboard/id", response_model=str)
+        async def get_applicant_id(user: str = Depends(RouterUtils.get_user_token)) -> str:
+            """Fetch the applicant_id for the given user from Firestore.
+
+            Args:
+                user (str): The user to fetch the applicant_id for.
+
+            Returns:
+                str: The applicant_id for the user
+            """
+            user_ref = db.collection('users').document(user['uid'])
+            doc = user_ref.get()
+
+            if not doc.exists:
+                LOG.debug(f"User {user['uid']} not found.")
+                raise HTTPException(
+                    status_code=404,
+                    detail="User not found"
+                )
+
+            user_data = doc.to_dict()
+            applicant_id = user_data.get('applicant_id')
+            LOG.debug(f"Applicant ID for user {user['uid']} is {applicant_id}")
+            return applicant_id
+
         @app.post("/onboard/start", response_model=SuccessOrFailureResponse)
         async def start_onboarding(
             user: str = Depends(RouterUtils.get_user_token)

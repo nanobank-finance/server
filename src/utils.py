@@ -37,9 +37,6 @@ class RouterUtils:
             HTTPBearer(auto_error=False)
         )
     ) -> None:
-        """Work in progress."""
-        return
-
         if credential is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -48,9 +45,9 @@ class RouterUtils:
             )
         try:
             if os.environ['NODE_ENV'] == 'development':
-                # ??????
-                auth.useEmulator("http://localhost:9099")
-                decoded_token = auth.verify_id_token(credential.credentials)
+                # When using the Firebase Authentication emulator,
+                # trust the UID in the decoded token.
+                decoded_token = {'uid': credential.credentials}
             else:
                 decoded_token = auth.verify_id_token(credential.credentials)
         except Exception as err:

@@ -42,10 +42,9 @@ class SumsubRouter():
             user_ref = db.collection('users').document(user['uid'])
             doc = user_ref.get()
             if not doc.exists:
-                raise HTTPException(
-                    status_code=404,
-                    detail="User not found"
-                )
+                LOG.debug(f"User {user['uid']} not found. Creating new user.")
+                user_ref.set({'uid': user['uid'], 'locked': False}, merge=True)
+                doc = user_ref.get()
 
             user_data = doc.to_dict()
             if user_data.get('locked', False):
@@ -59,21 +58,25 @@ class SumsubRouter():
 
             try:
                 # get applicant id corresponding to user from firestore
-                applicant_id = user_ref.get('applicant_id')
+                applicant_id = user_data.get('applicant_id')
 
                 # if the applicant id does not exist,
                 # create a new one in sumsub
                 # and store the id in firestore
                 if not applicant_id:
-                    applicant_id = create_applicant(user)
+                    applicant_id = create_applicant(user, 'basic-kyc-level')
                     update_applicant_id(user_ref, applicant_id)
 
                 # query sumsub for the status of the applicant id
                 status = get_applicant_status(applicant_id)
+                LOG.debug(f"Applicant {applicant_id} status: {status}")
                 return status
 
             except Exception as e:
-                return SuccessOrFailureResponse(success=False, message=str(e))
+                LOG.exception(e)
+                return SuccessOrFailureResponse(
+                    success=False, message=type(e).__name__
+                )
 
             finally:
                 # Unlock user

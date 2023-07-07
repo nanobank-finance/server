@@ -40,7 +40,7 @@ app.add_middleware(
 async def startup_firebase() -> None:
     """Initialize firebase app."""
     # firebase auth credentials
-    load_dotenv(Path(os.environ['SECRETS_PATH'] + "/.env.nanobank"))
+    load_dotenv(Path(os.environ['SECRETS_PATH'] + "/.env.nanoswap"))
     initialize_app(
         credential=credentials.Certificate(
             os.environ['FIREBASE_CREDENTIALS_PATH']

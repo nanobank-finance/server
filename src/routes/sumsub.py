@@ -11,6 +11,10 @@ from src.firestore import db, update_applicant_id, lock_user, unlock_user
 
 from fastapi import HTTPException
 import time
+import logging
+
+LOG = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class SumsubRouter():
@@ -34,6 +38,7 @@ class SumsubRouter():
                 str: The user status
             """
             # check if user id is "locked" in firestore
+            LOG.debug(f"Checking if user {user['uid']} is locked")
             user_ref = db.collection('users').document(user['uid'])
             doc = user_ref.get()
             if not doc.exists:

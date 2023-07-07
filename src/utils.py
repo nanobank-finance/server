@@ -7,7 +7,7 @@ from typing import List
 from typing_extensions import Unpack
 from functools import wraps
 
-from fastapi import Depends, HTTPException, Response, status
+from fastapi import Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from firebase_admin import auth
@@ -32,6 +32,7 @@ class RouterUtils:
 
     @staticmethod
     def get_user_token(
+        request: Request,
         res: Response,
         credential: HTTPAuthorizationCredentials = Depends(
             HTTPBearer(auto_error=False)
@@ -47,7 +48,7 @@ class RouterUtils:
             if os.environ['NODE_ENV'] == 'development':
                 # When using the Firebase Authentication emulator,
                 # trust the UID in the decoded token.
-                decoded_token = {'uid': credential.credentials}
+                decoded_token = {'uid': request.headers.get('X-User-Uid')}
             else:
                 decoded_token = auth.verify_id_token(credential.credentials)
         except Exception as err:

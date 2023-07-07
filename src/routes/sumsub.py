@@ -6,7 +6,7 @@ from typing import Self
 
 from src.schemas import SuccessOrFailureResponse, SumsubApplicantStatus
 from src.utils import RouterUtils
-from src.sumsub import create_applicant, get_applicant_status, get_access_token
+from src.sumsub import generate_sumsub_token
 from src.firestore import db
 from src.firestore.crud import check_locked, check_and_lock_user
 
@@ -59,6 +59,7 @@ class SumsubRouter():
                 transaction.rollback()
                 raise HTTPException(status_code=400, detail=str(e))
 
+        # TODO: not sure if this is needed
         @app.get("/onboard/id", response_model=str)
         async def get_applicant_id(user: str = Depends(RouterUtils.get_user_token)) -> str:
             """Fetch the applicant_id for the given user from Firestore.
@@ -83,3 +84,26 @@ class SumsubRouter():
             applicant_id = user_data.get('applicant_id')
             LOG.debug(f"Applicant ID for user {user['uid']} is {applicant_id}")
             return applicant_id
+
+        @app.get("/onboard/token", response_model=str)
+        async def sumsub_token(
+            user: str = Depends(RouterUtils.get_user_token)
+        ) -> dict:
+            """Generates a Sumsub access token and returns it.
+
+            Args:
+                user (str): The user to submit the application for.
+
+            Returns:
+                dict: A dictionary containing the newly generated access token.
+            """
+            uid = user['uid']
+            level_name = 'basic-kyc-level'  # replace with your level name
+            try:
+                return generate_sumsub_token(uid, level_name)
+            except Exception as e:
+                LOG.exception(e)
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to generate Sumsub access token"
+                )

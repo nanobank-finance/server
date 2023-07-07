@@ -33,45 +33,46 @@ class SumsubRouter():
             Returns:
                 str: The user status
             """
-            return SuccessOrFailureResponse(success=True)
+            # check if user id is "locked" in firestore
+            user_ref = db.collection('users').document(user['uid'])
+            doc = user_ref.get()
+            if not doc.exists:
+                raise HTTPException(
+                    status_code=404,
+                    detail="User not found"
+                )
 
-            # # check if user id is "locked" in firestore
-            # user_ref = db.collection('users').document(user)
-            # if not user_ref.locked:
-            #     raise HTTPException(
-            #         status_code=400,
-            #         detail="Duplicate request is already in progress"
-            #     )
+            user_data = doc.to_dict()
+            if user_data.get('locked', False):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Duplicate request is already in progress"
+                )
 
-            # # "lock" user id mapping to prevent race conditions
-            # lock_user(user_ref)
+            # "lock" user id mapping to prevent race conditions
+            lock_user(user_ref)
 
-            # try:
-            #     # get applicant id corresponding to user from firestore
-            #     applicant_id = user_ref.get('applicant_id')
+            try:
+                # get applicant id corresponding to user from firestore
+                applicant_id = user_ref.get('applicant_id')
 
-            #     # if the applicant id does not exist,
-            #     # create a new one in sumsub
-            #     # and store the id in firestore
-            #     if not applicant_id:
-            #         applicant_id = create_applicant(user)
-            #         update_applicant_id(user_ref, applicant_id)
+                # if the applicant id does not exist,
+                # create a new one in sumsub
+                # and store the id in firestore
+                if not applicant_id:
+                    applicant_id = create_applicant(user)
+                    update_applicant_id(user_ref, applicant_id)
 
-            #     # query sumsub for the status of the applicant id
-            #     status = get_applicant_status(applicant_id)
+                # query sumsub for the status of the applicant id
+                status = get_applicant_status(applicant_id)
+                return status
 
-            #     # Generate response based on status
-            #     if status == "success":
-            #         return SuccessOrFailureResponse(success=True)
-            #     else:
-            #         return SuccessOrFailureResponse(success=False)
+            except Exception as e:
+                return SuccessOrFailureResponse(success=False, message=str(e))
 
-            # except Exception as e:
-            #     return SuccessOrFailureResponse(success=False, message=str(e))
-
-            # finally:
-            #     # Unlock user
-            #     unlock_user(user_ref)
+            finally:
+                # Unlock user
+                unlock_user(user_ref)
 
         @app.post("/onboard/start", response_model=SuccessOrFailureResponse)
         async def start_onboarding(

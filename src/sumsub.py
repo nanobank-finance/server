@@ -6,14 +6,16 @@ import json
 import logging
 import time
 import uuid
+import os
 
 import requests
 
-SUMSUB_SECRET_KEY = "YOUR_SUMSUB_SECRET_KEY"  # Example: Hej2ch71kG2kTd1iIUDZFNsO5C1lh5Gq
-SUMSUB_APP_TOKEN = "YOUR_SUMSUB_APP_TOKEN"  # Example: sbx:uY0CgwELmgUAEyl4hNWxLngb.0WSeQeiYny4WEqmAALEAiK2qTC96fBad
 SUMSUB_TEST_BASE_URL = "https://api.sumsub.com"
 REQUEST_TIMEOUT = 60
 # Please don't forget to change token and secret key values to production ones when switching to production
+
+logging.basicConfig(level=logging.DEBUG)
+LOG = logging.getLogger(__name__)
 
 def create_applicant(external_user_id, level_name):
     # https://developers.sumsub.com/api-reference/#creating-an-applicant
@@ -30,6 +32,7 @@ def create_applicant(external_user_id, level_name):
                          headers=headers))
     s = requests.Session()
     response = s.send(resp, timeout=REQUEST_TIMEOUT)
+    LOG.debug(f"Sumsub create_applicant response: {response.json()}")
     applicant_id = (response.json()['id'])
     return applicant_id
 
@@ -54,6 +57,7 @@ def add_document(applicant_id):
                          ))
     sw = requests.Session()
     response = sw.send(resp, timeout=REQUEST_TIMEOUT)
+    LOG.debug(f"Sumsub add_document response: {response.json()}")
     return response.headers['X-Image-Id']
 
 
@@ -63,6 +67,7 @@ def get_applicant_status(applicant_id):
     resp = sign_request(requests.Request('GET', url))
     s = requests.Session()
     response = s.send(resp, timeout=REQUEST_TIMEOUT)
+    LOG.debug(f"Sumsub get_applicant_status response: {response.json()}")
     return response
 
 
@@ -77,10 +82,10 @@ def get_access_token(external_user_id, level_name):
                                          headers=headers))
     s = requests.Session()
     response = s.send(resp, timeout=REQUEST_TIMEOUT)
+    LOG.debug(f"Sumsub get_access_token response: {response.json()}")
     token = (response.json()['token'])
 
     return token
-
 
 def sign_request(request: requests.Request) -> requests.PreparedRequest:
     prepared_request = request.prepare()
@@ -94,11 +99,11 @@ def sign_request(request: requests.Request) -> requests.PreparedRequest:
     data_to_sign = str(now).encode('utf-8') + method.encode('utf-8') + path_url.encode('utf-8') + body
     # hmac needs bytes
     signature = hmac.new(
-        SUMSUB_SECRET_KEY.encode('utf-8'),
+        os.environ['SUMSUB_SECRET_KEY'].encode('utf-8'),
         data_to_sign,
         digestmod=hashlib.sha256
     )
-    prepared_request.headers['X-App-Token'] = SUMSUB_APP_TOKEN
+    prepared_request.headers['X-App-Token'] = os.environ['SUMSUB_APP_TOKEN']
     prepared_request.headers['X-App-Access-Ts'] = str(now)
     prepared_request.headers['X-App-Access-Sig'] = signature.hexdigest()
     return prepared_request

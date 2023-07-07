@@ -6,6 +6,7 @@ from bizlogic.loan.reader import LoanReader
 from bizlogic.loan.repayment import PaymentSchedule
 from bizlogic.loan.status import LoanStatusType
 from bizlogic.loan.writer import LoanWriter
+from bizlogic.utils import ParserType, Utils
 
 from fastapi import Depends, FastAPI
 
@@ -14,7 +15,7 @@ from ipfsclient.ipfs import Ipfs
 import pandas as pd
 
 from src.schemas import SuccessOrFailureResponse
-from src.utils import ParserType, RouterUtils
+from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -31,8 +32,6 @@ class LoanRouter():
         """
         ipfsclient = Ipfs()
         loan_reader = LoanReader(ipfsclient)
-
-        # Loan endpoints
 
         @app.get(
             "/loans/open",
@@ -55,7 +54,7 @@ class LoanRouter():
             results = loan_reader.query_for_status(
                 LoanStatusType.PENDING_ACCEPTANCE
             )
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -80,7 +79,7 @@ class LoanRouter():
                 List: List of loans.
             """
             results = loan_reader.query_for_status(LoanStatusType.ACCEPTED)
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -115,7 +114,7 @@ class LoanRouter():
                     perspective: borrower
                 }
             )
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -151,7 +150,7 @@ class LoanRouter():
                     perspective: them
                 }
             )
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -186,7 +185,7 @@ class LoanRouter():
                     perspective: borrower
                 }
             )
-            return RouterUtils.parse_results(
+            return Utils.parse_results(
                 results,
                 recent,
                 ParserType.LOAN
@@ -222,11 +221,8 @@ class LoanRouter():
                     perspective: them
                 }
             )
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+
+            return results.to_json(orient="records")
 
         @app.get(
             "/loans/user/self",
@@ -256,11 +252,7 @@ class LoanRouter():
             elif perspective == "lender":
                 results = loan_reader.query_for_lender(borrower)
 
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return results.to_json(orient="records")
 
         @app.get(
             "/loans/user/other",
@@ -291,11 +283,7 @@ class LoanRouter():
             elif perspective == "lender":
                 results = loan_reader.query_for_lender(them)
 
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return results.to_json(orient="records")
 
         @app.get(
             "/loan",
@@ -316,12 +304,7 @@ class LoanRouter():
             Returns:
                 List: List of loans.
             """
-            results = loan_reader.query_for_loan(loan_id)
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return loan_reader.query_for_loan(loan_id).to_json(orient="records")
 
         @app.post("/loan", response_model=SuccessOrFailureResponse)
         async def create_loan_offer(
@@ -349,7 +332,7 @@ class LoanRouter():
             lender = "123"  # TODO: get from KYC
             try:
 
-                offer_expiry_date = RouterUtils.nanosecond_epoch_to_datetime(expiry)  # noqa: E501
+                offer_expiry_date = Utils.nanosecond_epoch_to_datetime(expiry)  # noqa: E501
 
                 payment_schedule = PaymentSchedule.create_payment_schedule(
                     amount=principal,

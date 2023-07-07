@@ -14,6 +14,7 @@ import src.utils
 from src.routes.application import LoanApplicationRouter
 from src.routes.loan import LoanRouter
 from src.routes.vouch import VouchRouter
+from src.routes.sumsub import SumsubRouter
 
 app = FastAPI()
 
@@ -39,7 +40,7 @@ app.add_middleware(
 async def startup_firebase() -> None:
     """Initialize firebase app."""
     # firebase auth credentials
-    load_dotenv(Path(os.environ['SECRETS_PATH'] + "/.env.nanobank"))
+    load_dotenv(Path(os.environ['SECRETS_PATH'] + "/.env.nanoswap"))
     initialize_app(
         credential=credentials.Certificate(
             os.environ['FIREBASE_CREDENTIALS_PATH']
@@ -61,6 +62,7 @@ async def startup_router() -> None:
     LoanApplicationRouter(app)
     LoanRouter(app)
     VouchRouter(app)
+    SumsubRouter(app)
 
 
 @app.on_event("startup")

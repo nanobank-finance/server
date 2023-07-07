@@ -3,13 +3,14 @@ import logging
 from typing import List, Self, Union
 
 from bizlogic.vouch import VouchReader, VouchWriter
+from bizlogic.utils import ParserType, Utils
 
 from fastapi import Depends, FastAPI
 
 from ipfsclient.ipfs import Ipfs
 
 from src.schemas import SuccessOrFailureResponse
-from src.utils import ParserType, RouterUtils
+from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -74,12 +75,7 @@ class VouchRouter():
             Returns:
                 List: List of vouches.
             """
-            results = vouch_reader.get_all_vouches()
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.VOUCH
-            )
+            return vouch_reader.get_all_vouches().to_json(orient="records")
 
         @app.get(
             "/vouch/user/self",
@@ -102,15 +98,11 @@ class VouchRouter():
             assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
             if perspective == "voucher":
-                results = vouch_reader.get_vouchers_for_borrower(borrower)
+                results = vouch_reader.query_vouches(voucher=borrower)
             elif perspective == "vouchee":
-                results = vouch_reader.get_vouchees_for_borrower(borrower)
+                results = vouch_reader.query_vouches(vouchee=borrower)
 
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.VOUCH
-            )
+            return results.to_json(orient="records")
 
         @app.get(
             "/vouch/user/other",
@@ -134,12 +126,8 @@ class VouchRouter():
             """
             assert perspective in ["voucher", "vouchee"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             if perspective == "voucher":
-                results = vouch_reader.get_vouchers_for_borrower(them)
+                results = vouch_reader.query_vouches(voucher=them)
             elif perspective == "vouchee":
-                results = vouch_reader.get_vouchees_for_borrower(them)
+                results = vouch_reader.query_vouches(vouchee=them)
 
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.VOUCH
-            )
+            return results.to_json(orient="records")

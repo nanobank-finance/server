@@ -3,13 +3,14 @@ import logging
 from typing import List, Self, Union
 
 from bizlogic.application import LoanApplicationReader, LoanApplicationWriter
+from bizlogic.utils import ParserType, Utils
 
 from fastapi import Depends, FastAPI
 
 from ipfsclient.ipfs import Ipfs
 
 from src.schemas import SuccessOrFailureResponse
-from src.utils import ParserType, RouterUtils
+from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -78,12 +79,7 @@ class LoanApplicationRouter():
             Returns:
                 List: _description_
             """
-            results = loan_application_reader.get_open_loan_applications()
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN_APPLICATION
-            )
+            return loan_application_reader.query_loan_applications(open_only=True).to_json(orient="records")
 
         @app.get(
             "/loan/application/user/self",
@@ -103,12 +99,7 @@ class LoanApplicationRouter():
                 List: _description_
             """
             borrower = "123"  # TODO: get from KYC
-            results = loan_application_reader.get_loan_applications_for_borrower(borrower)  # noqa: E501
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN_APPLICATION
-            )
+            return loan_application_reader.query_loan_applications(borrower=borrower).to_json(orient="records")  # noqa: E501
 
         @app.get(
             "/loan/application/user/other",
@@ -129,12 +120,7 @@ class LoanApplicationRouter():
             Returns:
                 List: _description_
             """
-            results = loan_application_reader.get_loan_applications_for_borrower(them)  # noqa: E501
-            return RouterUtils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN_APPLICATION
-            )
+            return loan_application_reader.query_loan_applications(borrower=them).to_json(orient="records")  # noqa: E501
 
         @app.delete(
             "/loan/application/{application}",

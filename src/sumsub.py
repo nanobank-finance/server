@@ -63,12 +63,12 @@ def add_document(applicant_id):
 
 def get_applicant_status(applicant_id):
     # https://developers.sumsub.com/api-reference/#getting-applicant-status-api
-    url = SUMSUB_TEST_BASE_URL + '/resources/applicants/' + applicant_id + '/requiredIdDocsStatus'
+    url = SUMSUB_TEST_BASE_URL + '/resources/applicants/' + applicant_id + '/status'
     resp = sign_request(requests.Request('GET', url))
     s = requests.Session()
     response = s.send(resp, timeout=REQUEST_TIMEOUT)
     LOG.debug(f"Sumsub get_applicant_status response: {response.json()}")
-    return response
+    return response.json()
 
 
 def get_access_token(external_user_id, level_name):

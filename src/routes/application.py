@@ -43,11 +43,10 @@ class LoanApplicationRouter():
             Returns:
                 SuccessOrFailureResponse: `success=True` when successful.
             """
-            borrower = "123"  # TODO: get from KYC
             try:
                 loan_application_writer = LoanApplicationWriter(
                     ipfsclient,
-                    borrower,
+                    user,
                     application.asking
                 )
                 loan_application_writer.write()
@@ -79,7 +78,7 @@ class LoanApplicationRouter():
             Returns:
                 List: _description_
             """
-            return loan_application_reader.query_loan_applications(open_only=True).to_json(orient="records")
+            return loan_application_reader.query_loan_applications(open_only=True).to_dict(orient="records")
 
         @app.get(
             "/loan/application/user/self",
@@ -98,8 +97,7 @@ class LoanApplicationRouter():
             Returns:
                 List: _description_
             """
-            borrower = "123"  # TODO: get from KYC
-            return loan_application_reader.query_loan_applications(borrower=borrower).to_json(orient="records")  # noqa: E501
+            return loan_application_reader.query_loan_applications(borrower=user).to_dict(orient="records")  # noqa: E501
 
         @app.get(
             "/loan/application/user/other",
@@ -120,7 +118,7 @@ class LoanApplicationRouter():
             Returns:
                 List: _description_
             """
-            return loan_application_reader.query_loan_applications(borrower=them).to_json(orient="records")  # noqa: E501
+            return loan_application_reader.query_loan_applications(borrower=them).to_dict(orient="records")  # noqa: E501
 
         @app.delete(
             "/loan/application/{application}",

@@ -34,8 +34,7 @@ class LoanRouter():
         loan_reader = LoanReader(ipfsclient)
 
         @app.get(
-            "/loans/open",
-            response_model=List
+            "/loans/open"
         )
         async def get_open_loans(
             recent: bool = False,
@@ -51,18 +50,13 @@ class LoanRouter():
             Returns:
                 List: List of loans.
             """
-            results = loan_reader.query_for_status(
-                LoanStatusType.PENDING_ACCEPTANCE
-            )
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return loan_reader.query_for_status(
+                LoanStatusType.PENDING_ACCEPTANCE,
+                recent_only=recent
+            ).to_json(orient="records")
 
         @app.get(
-            "/loans/accepted",
-            response_model=List
+            "/loans/accepted"
         )
         async def get_accepted_loans(
             recent: bool = False,
@@ -78,16 +72,13 @@ class LoanRouter():
             Returns:
                 List: List of loans.
             """
-            results = loan_reader.query_for_status(LoanStatusType.ACCEPTED)
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return loan_reader.query_for_status(
+                LoanStatusType.ACCEPTED,
+                recent_only=recent
+            ).to_json(orient="records")
 
         @app.get(
-            "/loans/user/self/open",
-            response_model=List
+            "/loans/user/self/open"
         )
         async def get_my_open_loans(
             perspective: str = "borrower",
@@ -112,17 +103,13 @@ class LoanRouter():
                 LoanStatusType.PENDING_ACCEPTANCE,
                 index={
                     perspective: borrower
-                }
+                },
+                recent_only=recent
             )
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return results.to_json(orient="records")
 
         @app.get(
-            "/loans/user/their/open",
-            response_model=List
+            "/loans/user/their/open"
         )
         async def get_their_open_loans(
             them: int,
@@ -148,17 +135,13 @@ class LoanRouter():
                 LoanStatusType.PENDING_ACCEPTANCE,
                 index={
                     perspective: them
-                }
+                },
+                recent_only=recent
             )
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
+            return results.to_json(orient="records")
 
         @app.get(
-            "/loans/user/self/accepted",
-            response_model=List
+            "/loans/user/self/accepted"
         )
         async def get_my_accepted_loans(
             perspective: str = "borrower",
@@ -183,17 +166,12 @@ class LoanRouter():
                 LoanStatusType.ACCEPTED,
                 index={
                     perspective: borrower
-                }
+                },
+                recent_only=recent
             )
-            return Utils.parse_results(
-                results,
-                recent,
-                ParserType.LOAN
-            )
-        
+
         @app.get(
-            "/loans/user/their/accepted",
-            response_model=List
+            "/loans/user/their/accepted"
         )
         async def get_their_accepted_loans(
             them: int,
@@ -219,14 +197,14 @@ class LoanRouter():
                 LoanStatusType.ACCEPTED,
                 index={
                     perspective: them
-                }
+                },
+                recent_only=recent
             )
 
             return results.to_json(orient="records")
 
         @app.get(
-            "/loans/user/self",
-            response_model=List
+            "/loans/user/self"
         )
         async def get_my_loans(
             perspective: str = "borrower",
@@ -248,15 +226,14 @@ class LoanRouter():
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
             borrower = "123"  # TODO: get from KYC
             if perspective == "borrower":
-                results = loan_reader.query_for_borrower(borrower)
+                results = loan_reader.query_for_borrower(borrower, recent_only=recent)
             elif perspective == "lender":
-                results = loan_reader.query_for_lender(borrower)
+                results = loan_reader.query_for_lender(borrower, recent_only=recent)
 
             return results.to_json(orient="records")
 
         @app.get(
-            "/loans/user/other",
-            response_model=List
+            "/loans/user/other"
         )
         async def get_their_loans(
             them: str,
@@ -273,7 +250,7 @@ class LoanRouter():
                 recent (bool, optional): If True, only return the most recent
                     loan. Defaults to False.
                 user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
-                
+
             Returns:
                 List: List of loans.
             """
@@ -286,8 +263,7 @@ class LoanRouter():
             return results.to_json(orient="records")
 
         @app.get(
-            "/loan",
-            response_model=List
+            "/loan"
         )
         async def get_loan_details(
             loan_id: str,
@@ -325,7 +301,7 @@ class LoanRouter():
                 duration (int): The duration of the loan.
                 payments (int): The number of payments.
                 expiry (int): The expiry of the loan.
-            
+
             Returns:
                 SuccessOrFailureResponse: The response.
             """

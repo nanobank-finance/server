@@ -85,7 +85,7 @@ class SumsubRouter():
             LOG.debug(f"Applicant ID for user {user['uid']} is {applicant_id}")
             return applicant_id
 
-        @app.get("/onboard/token", response_model=str)
+        @app.get("/onboard/token", response_model=dict)
         async def sumsub_token(
             user: str = Depends(RouterUtils.get_user_token)
         ) -> dict:
@@ -100,7 +100,9 @@ class SumsubRouter():
             uid = user['uid']
             level_name = 'basic-kyc-level'  # replace with your level name
             try:
-                return generate_sumsub_token(uid, level_name)
+                token = generate_sumsub_token(uid, level_name)
+                LOG.debug(f"Generated Sumsub access token for user {uid}")
+                return {'token': token}
             except Exception as e:
                 LOG.exception(e)
                 raise HTTPException(

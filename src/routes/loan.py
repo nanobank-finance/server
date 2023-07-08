@@ -34,7 +34,8 @@ class LoanRouter():
         loan_reader = LoanReader(ipfsclient)
 
         @app.get(
-            "/loans/open"
+            "/loans/open",
+            response_model=dict
         )
         async def get_open_loans(
             recent: bool = False,
@@ -56,7 +57,8 @@ class LoanRouter():
             ).to_json(orient="records")
 
         @app.get(
-            "/loans/accepted"
+            "/loans/accepted",
+            response_model=dict
         )
         async def get_accepted_loans(
             recent: bool = False,
@@ -72,13 +74,16 @@ class LoanRouter():
             Returns:
                 List: List of loans.
             """
-            return loan_reader.query_for_status(
+            response = loan_reader.query_for_status(
                 LoanStatusType.ACCEPTED,
                 recent_only=recent
             ).to_json(orient="records")
+            LOG.debug(response)
+            return {"data": response}
 
         @app.get(
-            "/loans/user/self/open"
+            "/loans/user/self/open",
+            response_model=dict
         )
         async def get_my_open_loans(
             perspective: str = "borrower",
@@ -109,7 +114,8 @@ class LoanRouter():
             return results.to_json(orient="records")
 
         @app.get(
-            "/loans/user/their/open"
+            "/loans/user/their/open",
+            response_model=dict
         )
         async def get_their_open_loans(
             them: int,
@@ -141,7 +147,8 @@ class LoanRouter():
             return results.to_json(orient="records")
 
         @app.get(
-            "/loans/user/self/accepted"
+            "/loans/user/self/accepted",
+            response_model=dict
         )
         async def get_my_accepted_loans(
             perspective: str = "borrower",
@@ -171,7 +178,8 @@ class LoanRouter():
             )
 
         @app.get(
-            "/loans/user/their/accepted"
+            "/loans/user/their/accepted",
+            response_model=dict
         )
         async def get_their_accepted_loans(
             them: int,
@@ -204,7 +212,8 @@ class LoanRouter():
             return results.to_json(orient="records")
 
         @app.get(
-            "/loans/user/self"
+            "/loans/user/self",
+            response_model=dict
         )
         async def get_my_loans(
             perspective: str = "borrower",
@@ -233,7 +242,8 @@ class LoanRouter():
             return results.to_json(orient="records")
 
         @app.get(
-            "/loans/user/other"
+            "/loans/user/other",
+            response_model=dict
         )
         async def get_their_loans(
             them: str,
@@ -263,7 +273,8 @@ class LoanRouter():
             return results.to_json(orient="records")
 
         @app.get(
-            "/loan"
+            "/loan",
+            response_model=dict
         )
         async def get_loan_details(
             loan_id: str,

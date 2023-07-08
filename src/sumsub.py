@@ -11,6 +11,8 @@ from typing import Optional
 
 import requests
 
+from src.schemas import SumsubApplicantStatus
+
 SUMSUB_TEST_BASE_URL = "https://api.sumsub.com"
 REQUEST_TIMEOUT = 60
 # Please don't forget to change token and secret key values to production ones when switching to production
@@ -82,7 +84,7 @@ def add_document(applicant_id):
     return response.headers['X-Image-Id']
 
 
-def get_applicant_status(applicant_id):
+def get_applicant_status(applicant_id) -> SumsubApplicantStatus:
     # https://developers.sumsub.com/api-reference/#getting-applicant-status-api
     url = SUMSUB_TEST_BASE_URL + '/resources/applicants/' + applicant_id + '/status'
     resp = sign_request(requests.Request('GET', url))

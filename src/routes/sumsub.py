@@ -29,7 +29,7 @@ class SumsubRouter():
         @app.get("/onboard/status", response_model=SumsubApplicantStatus)
         async def onboard_status(
             user: str = Depends(RouterUtils.get_user_token)
-        ) -> str:
+        ) -> SumsubApplicantStatus:
             """Query Firestore to see if the user has been onboarded yet.
 
             Only one request can be in progress at a time for a given user.
@@ -42,7 +42,7 @@ class SumsubRouter():
                 str: The user status
             """
             # Check if the user is locked
-            if check_locked(user['uid']):
+            if check_locked(user):
                 raise HTTPException(
                     status_code=400,
                     detail="Duplicate request is already in progress"
@@ -53,14 +53,14 @@ class SumsubRouter():
 
             # Check and lock the user in the transaction
             try:
-                return check_and_lock_user(transaction, user['uid'])
+                return check_and_lock_user(transaction, user)
             except Exception as e:
                 LOG.exception(e)
                 transaction.rollback()
                 raise HTTPException(status_code=400, detail=str(e))
 
         # TODO: not sure if this is needed
-        @app.get("/onboard/id", response_model=str)
+        @app.get("/onboard/id", response_model=dict)
         async def get_applicant_id(user: str = Depends(RouterUtils.get_user_token)) -> str:
             """Fetch the applicant_id for the given user from Firestore.
 
@@ -70,11 +70,11 @@ class SumsubRouter():
             Returns:
                 str: The applicant_id for the user
             """
-            user_ref = db.collection('users').document(user['uid'])
+            user_ref = db.collection('users').document(user)
             doc = user_ref.get()
 
             if not doc.exists:
-                LOG.debug(f"User {user['uid']} not found.")
+                LOG.debug(f"User {user} not found.")
                 raise HTTPException(
                     status_code=404,
                     detail="User not found"
@@ -82,7 +82,7 @@ class SumsubRouter():
 
             user_data = doc.to_dict()
             applicant_id = user_data.get('applicant_id')
-            LOG.debug(f"Applicant ID for user {user['uid']} is {applicant_id}")
+            LOG.debug(f"Applicant ID for user {user} is {applicant_id}")
             return applicant_id
 
         @app.get("/onboard/token", response_model=dict)
@@ -97,11 +97,10 @@ class SumsubRouter():
             Returns:
                 dict: A dictionary containing the newly generated access token.
             """
-            uid = user['uid']
             level_name = 'basic-kyc-level'  # replace with your level name
             try:
-                token = generate_sumsub_token(uid, level_name)
-                LOG.debug(f"Generated Sumsub access token for user {uid}")
+                token = generate_sumsub_token(user, level_name)
+                LOG.debug(f"Generated Sumsub access token for user {user}")
                 return {'token': token}
             except Exception as e:
                 LOG.exception(e)

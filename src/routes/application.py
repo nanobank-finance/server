@@ -9,7 +9,7 @@ from fastapi import Depends, FastAPI
 
 from ipfsclient.ipfs import Ipfs
 
-from src.schemas import SuccessOrFailureResponse
+from src.schemas import LoanApplication, SuccessOrFailureResponse
 from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ class LoanApplicationRouter():
 
         @app.post("/loan/application", response_model=SuccessOrFailureResponse)
         async def submit_loan_application(
-            asking: int,
+            application: LoanApplication,
             user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
             """Create a loan application.
@@ -48,7 +48,7 @@ class LoanApplicationRouter():
                 loan_application_writer = LoanApplicationWriter(
                     ipfsclient,
                     borrower,
-                    asking
+                    application.asking
                 )
                 loan_application_writer.write()
                 return SuccessOrFailureResponse(

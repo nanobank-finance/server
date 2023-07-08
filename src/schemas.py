@@ -11,6 +11,8 @@ class SuccessOrFailureResponse(BaseModel):
     error_message: Union[str, None] = None
     error_type: Union[str, None] = None
 
+class LoanApplication(BaseModel):
+    asking: int
 
 class SumsubReviewResult(BaseModel):
     moderationComment: Optional[str] = Field(None, description="A human-readable comment that can be shown to the end user.")

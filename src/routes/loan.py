@@ -54,7 +54,7 @@ class LoanRouter():
             return loan_reader.query_for_status(
                 LoanStatusType.PENDING_ACCEPTANCE,
                 recent_only=recent
-            ).to_json(orient="records")
+            ).to_dict(orient="records")
 
         @app.get(
             "/loans/accepted",
@@ -74,12 +74,10 @@ class LoanRouter():
             Returns:
                 List: List of loans.
             """
-            response = loan_reader.query_for_status(
+            return loan_reader.query_for_status(
                 LoanStatusType.ACCEPTED,
                 recent_only=recent
-            ).to_json(orient="records")
-            LOG.debug(response)
-            return {"data": response}
+            ).to_dict(orient="records")
 
         @app.get(
             "/loans/user/self/open",
@@ -111,7 +109,7 @@ class LoanRouter():
                 },
                 recent_only=recent
             )
-            return results.to_json(orient="records")
+            return results.to_dict(orient="records")
 
         @app.get(
             "/loans/user/their/open",
@@ -144,7 +142,7 @@ class LoanRouter():
                 },
                 recent_only=recent
             )
-            return results.to_json(orient="records")
+            return results.to_dict(orient="records")
 
         @app.get(
             "/loans/user/self/accepted",
@@ -176,6 +174,7 @@ class LoanRouter():
                 },
                 recent_only=recent
             )
+            return results.to_dict(orient="records")
 
         @app.get(
             "/loans/user/their/accepted",
@@ -209,7 +208,7 @@ class LoanRouter():
                 recent_only=recent
             )
 
-            return results.to_json(orient="records")
+            return results.to_dict(orient="records")
 
         @app.get(
             "/loans/user/self",
@@ -239,7 +238,7 @@ class LoanRouter():
             elif perspective == "lender":
                 results = loan_reader.query_for_lender(borrower, recent_only=recent)
 
-            return results.to_json(orient="records")
+            return results.to_dict(orient="records")
 
         @app.get(
             "/loans/user/other",
@@ -270,7 +269,7 @@ class LoanRouter():
             elif perspective == "lender":
                 results = loan_reader.query_for_lender(them)
 
-            return results.to_json(orient="records")
+            return results.to_dict(orient="records")
 
         @app.get(
             "/loan",

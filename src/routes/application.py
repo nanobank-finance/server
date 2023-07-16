@@ -136,17 +136,17 @@ class LoanApplicationRouter():
             Returns:
                 SuccessOrFailureResponse: `success=True` when successful.
             """
-            borrower = "123"  # TODO: get from KYC
-
             try:
                 # query to get the application data
-                results = loan_application_reader.get_loan_application(application)  # noqa: E501
+                results = loan_application_reader.get_loan_application(user)  # noqa: E501
+
+                # TODO: get the specific application
 
                 # parse the results
                 for result in results:
                     loan_application_writer = LoanApplicationWriter(
                         ipfsclient,
-                        borrower,
+                        user,
                         result.reader.amount_asking,
                         result.reader.closed
                     )

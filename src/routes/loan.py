@@ -297,41 +297,30 @@ class LoanRouter():
                 borrower: str,
                 principal: int,
                 interest: float,
-                duration: int,
                 payments: int,
+                start: int,
+                maturity: int,
                 expiry: int,
                 user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
-            """Create a loan offer.
-
-            Args:
-                borrower (str): The borrower ID.
-                principal (int): The principal amount.
-                interest (float): The interest rate.
-                duration (int): The duration of the loan.
-                payments (int): The number of payments.
-                expiry (int): The expiry of the loan.
-
-            Returns:
-                SuccessOrFailureResponse: The response.
-            """
-            lender = "123"  # TODO: get from KYC
+            """Create a loan offer."""
             try:
-
+                start_date = Utils.nanosecond_epoch_to_datetime(start)  # noqa: E501
+                maturity_date = Utils.nanosecond_epoch_to_datetime(maturity)  # noqa: E501
                 offer_expiry_date = Utils.nanosecond_epoch_to_datetime(expiry)  # noqa: E501
 
                 payment_schedule = PaymentSchedule.create_payment_schedule(
                     amount=principal,
                     interest_rate=interest,
-                    total_duration=pd.Timedelta(duration, unit='ns'),
-                    number_of_payments=payments,
-                    first_payment=offer_expiry_date
+                    start_date=start_date,
+                    end_date=maturity_date,
+                    number_of_payments=payments
                 )
 
                 loan_writer = LoanWriter(
                     ipfsclient,
                     borrower,
-                    lender,
+                    user,
                     principal,
                     payment_schedule,
                     offer_expiry=offer_expiry_date

@@ -14,7 +14,7 @@ from ipfsclient.ipfs import Ipfs
 
 import pandas as pd
 
-from src.schemas import SuccessOrFailureResponse
+from src.schemas import LoanOffer, SuccessOrFailureResponse
 from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
@@ -294,36 +294,26 @@ class LoanRouter():
 
         @app.post("/loan", response_model=SuccessOrFailureResponse)
         async def create_loan_offer(
-                borrower: str,
-                principal: int,
-                interest: float,
-                payments: int,
-                start: int,
-                maturity: int,
-                expiry: int,
-                user: str = Depends(RouterUtils.get_user_token)
+            loan: LoanOffer,
+            user: str = Depends(RouterUtils.get_user_token)
         ) -> SuccessOrFailureResponse:
             """Create a loan offer."""
             try:
-                start_date = Utils.nanosecond_epoch_to_datetime(start)  # noqa: E501
-                maturity_date = Utils.nanosecond_epoch_to_datetime(maturity)  # noqa: E501
-                offer_expiry_date = Utils.nanosecond_epoch_to_datetime(expiry)  # noqa: E501
-
                 payment_schedule = PaymentSchedule.create_payment_schedule(
-                    amount=principal,
-                    interest_rate=interest,
-                    start_date=start_date,
-                    end_date=maturity_date,
-                    number_of_payments=payments
+                    principal=loan.principal,
+                    interest_rate=loan.interest,
+                    start_date=loan.start,
+                    end_date=loan.maturity,
+                    number_of_payments=loan.payments
                 )
 
                 loan_writer = LoanWriter(
                     ipfsclient,
-                    borrower,
+                    loan.borrower,
                     user,
-                    principal,
+                    int(loan.principal),
                     payment_schedule,
-                    offer_expiry=offer_expiry_date
+                    offer_expiry=loan.expiry
                 )
 
                 loan_writer.write()

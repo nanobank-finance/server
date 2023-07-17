@@ -7,8 +7,11 @@ import logging
 import time
 import uuid
 import os
+from typing import Optional
 
 import requests
+
+from src.schemas import SumsubApplicantStatus
 
 SUMSUB_TEST_BASE_URL = "https://api.sumsub.com"
 REQUEST_TIMEOUT = 60
@@ -16,6 +19,26 @@ REQUEST_TIMEOUT = 60
 
 logging.basicConfig(level=logging.DEBUG)
 LOG = logging.getLogger(__name__)
+
+def generate_sumsub_token(uid: str, level_name: str, ttl_in_secs: Optional[int]=600) -> str:
+    """Generates a Sumsub access token.
+
+    Args:
+        uid (str): The external user ID which will be bound to the token.
+        level_name (str): The name of the level configured in the dashboard.
+        ttl_in_secs (int, optional): Lifespan of a token in seconds. Default is 600 seconds.
+
+    Returns:
+        str: A newly generated access token for an applicant.
+    """
+    url = SUMSUB_TEST_BASE_URL + f'/resources/accessTokens?userId={uid}&levelName={level_name}'
+    if ttl_in_secs is not None:
+        url += f'&ttlInSecs={ttl_in_secs}'
+    resp = sign_request(requests.Request('POST', url))
+    s = requests.Session()
+    response = s.send(resp, timeout=REQUEST_TIMEOUT)
+    LOG.debug(f"Sumsub generate_sumsub_token response: {response.json()}")
+    return response.json().get('token')
 
 def create_applicant(external_user_id, level_name):
     # https://developers.sumsub.com/api-reference/#creating-an-applicant
@@ -61,7 +84,7 @@ def add_document(applicant_id):
     return response.headers['X-Image-Id']
 
 
-def get_applicant_status(applicant_id):
+def get_applicant_status(applicant_id) -> SumsubApplicantStatus:
     # https://developers.sumsub.com/api-reference/#getting-applicant-status-api
     url = SUMSUB_TEST_BASE_URL + '/resources/applicants/' + applicant_id + '/status'
     resp = sign_request(requests.Request('GET', url))

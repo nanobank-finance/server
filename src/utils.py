@@ -37,7 +37,7 @@ class RouterUtils:
         credential: HTTPAuthorizationCredentials = Depends(
             HTTPBearer(auto_error=False)
         )
-    ) -> None:
+    ) -> str:
         if credential is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -59,7 +59,7 @@ class RouterUtils:
             )
 
         res.headers['WWW-Authenticate'] = 'Bearer realm="auth_required"'
-        return decoded_token
+        return decoded_token['uid']
 
 
 def get_config() -> None:

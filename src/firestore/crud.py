@@ -6,6 +6,7 @@ from google.cloud import firestore
 from google.cloud.firestore_v1.transaction import Transaction
 
 from src.firestore import db
+from src.schemas import SumsubApplicantStatus
 from src.sumsub import create_applicant, get_applicant_status
 
 LOG = logging.getLogger(__name__)
@@ -37,7 +38,7 @@ def check_locked(uid: str) -> bool:
 
 
 @firestore.transactional
-def check_and_lock_user(transaction: Transaction, uid: str) -> str:
+def check_and_lock_user(transaction: Transaction, uid: str) -> SumsubApplicantStatus:
     """Perform the transaction of checking and locking the user.
 
     This function will be called within a Firestore transaction and ensures that

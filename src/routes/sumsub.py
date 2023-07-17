@@ -6,7 +6,7 @@ from typing import Self
 
 from src.schemas import SuccessOrFailureResponse, SumsubApplicantStatus
 from src.utils import RouterUtils
-from src.sumsub import create_applicant, get_applicant_status, get_access_token
+from src.sumsub import generate_sumsub_token
 from src.firestore import db
 from src.firestore.crud import check_locked, check_and_lock_user
 
@@ -29,7 +29,7 @@ class SumsubRouter():
         @app.get("/onboard/status", response_model=SumsubApplicantStatus)
         async def onboard_status(
             user: str = Depends(RouterUtils.get_user_token)
-        ) -> str:
+        ) -> SumsubApplicantStatus:
             """Query Firestore to see if the user has been onboarded yet.
 
             Only one request can be in progress at a time for a given user.
@@ -42,7 +42,7 @@ class SumsubRouter():
                 str: The user status
             """
             # Check if the user is locked
-            if check_locked(user['uid']):
+            if check_locked(user):
                 raise HTTPException(
                     status_code=400,
                     detail="Duplicate request is already in progress"
@@ -53,25 +53,58 @@ class SumsubRouter():
 
             # Check and lock the user in the transaction
             try:
-                return check_and_lock_user(transaction, user['uid'])
+                return check_and_lock_user(transaction, user)
             except Exception as e:
                 LOG.exception(e)
                 transaction.rollback()
                 raise HTTPException(status_code=400, detail=str(e))
 
-        @app.post("/onboard/start", response_model=SuccessOrFailureResponse)
-        async def start_onboarding(
-            user: str = Depends(RouterUtils.get_user_token)
-        ) -> SuccessOrFailureResponse:
-            """Start the onboarding process.
+        # TODO: not sure if this is needed
+        @app.get("/onboard/id", response_model=dict)
+        async def get_applicant_id(user: str = Depends(RouterUtils.get_user_token)) -> str:
+            """Fetch the applicant_id for the given user from Firestore.
 
-             - Create a KYC applicant
-             - Store the Auth user ID with the KYC applicant ID
+            Args:
+                user (str): The user to fetch the applicant_id for.
+
+            Returns:
+                str: The applicant_id for the user
+            """
+            user_ref = db.collection('users').document(user)
+            doc = user_ref.get()
+
+            if not doc.exists:
+                LOG.debug(f"User {user} not found.")
+                raise HTTPException(
+                    status_code=404,
+                    detail="User not found"
+                )
+
+            user_data = doc.to_dict()
+            applicant_id = user_data.get('applicant_id')
+            LOG.debug(f"Applicant ID for user {user} is {applicant_id}")
+            return applicant_id
+
+        @app.get("/onboard/token", response_model=dict)
+        async def sumsub_token(
+            user: str = Depends(RouterUtils.get_user_token)
+        ) -> dict:
+            """Generates a Sumsub access token and returns it.
 
             Args:
                 user (str): The user to submit the application for.
 
             Returns:
-                SuccessOrFailureResponse: `success=True` when successful.
+                dict: A dictionary containing the newly generated access token.
             """
-            pass
+            level_name = 'basic-kyc-level'  # replace with your level name
+            try:
+                token = generate_sumsub_token(user, level_name)
+                LOG.debug(f"Generated Sumsub access token for user {user}")
+                return {'token': token}
+            except Exception as e:
+                LOG.exception(e)
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to generate Sumsub access token"
+                )

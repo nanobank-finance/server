@@ -14,7 +14,7 @@ from ipfsclient.ipfs import Ipfs
 
 import pandas as pd
 
-from src.schemas import LoanOffer, SuccessOrFailureResponse
+from src.schemas import LoanOffer, LoanResponse, SuccessOrFailureResponse
 from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
@@ -81,13 +81,13 @@ class LoanRouter():
 
         @app.get(
             "/loans/user/self/open",
-            response_model=dict
+            response_model=List[LoanResponse]
         )
         async def get_my_open_loans(
             perspective: str = "borrower",
             recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
-        ) -> List:
+        ) -> List[LoanResponse]:
             """Get all open loans for the user.
 
             Args:
@@ -101,15 +101,15 @@ class LoanRouter():
                 List: List of loans.
             """
             assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
-            borrower = "123"  # TODO: get from KYC
+
             results = loan_reader.query_for_status(
                 LoanStatusType.PENDING_ACCEPTANCE,
                 index={
-                    perspective: borrower
-                },
-                recent_only=recent
+                    perspective: user
+                }
             )
-            return results.to_dict(orient="records")
+
+            return RouterUtils.sanitize_output(results.to_dict(orient="records"))
 
         @app.get(
             "/loans/user/their/open",

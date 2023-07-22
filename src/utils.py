@@ -61,6 +61,13 @@ class RouterUtils:
         res.headers['WWW-Authenticate'] = 'Bearer realm="auth_required"'
         return decoded_token['uid']
 
+    @staticmethod
+    def sanitize_output(data):
+        for item in data:
+            item['loan_status'] = item['loan_status'].value
+            item['created'] = item['created'].to_pydatetime()
+            item['offer_expiry'] = item['offer_expiry'].to_pydatetime()
+        return data
 
 def get_config() -> None:
     """Get the feature flag config."""

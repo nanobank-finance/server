@@ -2,6 +2,7 @@
 from typing import Union, Optional, List
 from pydantic import BaseModel, Field
 from datetime import datetime
+from enum import Enum
 
 
 class SuccessOrFailureResponse(BaseModel):
@@ -22,6 +23,23 @@ class LoanOffer(BaseModel):
     start: datetime
     maturity: datetime
     expiry: datetime
+
+class LoanStatusType(Enum):
+    PENDING_ACCEPTANCE = 1
+    EXPIRED_UNACCEPTED = 2
+    ACCEPTED = 3
+
+class LoanResponse(BaseModel):
+    loan: str
+    borrower: str
+    lender: str
+    created: datetime
+    principal: int
+    offer_expiry: datetime
+    transaction: Optional[str]
+    accepted: bool
+    payments: int
+    loan_status: LoanStatusType
 
 class SumsubReviewResult(BaseModel):
     moderationComment: Optional[str] = Field(None, description="A human-readable comment that can be shown to the end user.")

@@ -13,8 +13,9 @@ from fastapi import Depends, FastAPI
 from ipfsclient.ipfs import Ipfs
 
 import pandas as pd
+from src import uuid_images
 
-from src.schemas import LoanOffer, LoanResponse, SuccessOrFailureResponse
+from src.schemas import LoanDetailResponse, LoanOffer, LoanResponse, SuccessOrFailureResponse
 from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
@@ -273,13 +274,12 @@ class LoanRouter():
 
         @app.get(
             "/loan",
-            response_model=dict
+            response_model=LoanDetailResponse
         )
         async def get_loan_details(
             loan_id: str,
-            recent: bool = False,
             user: str = Depends(RouterUtils.get_user_token)
-        ) -> List:
+        ) -> LoanDetailResponse:
             """Get all loans for the user.
 
             Args:
@@ -290,7 +290,11 @@ class LoanRouter():
             Returns:
                 List: List of loans.
             """
-            return loan_reader.query_for_loan(loan_id).to_json(orient="records")
+            response = loan_reader.query_for_loan_details(loan_id, recent_only=True)[0]
+            LOG.debug("Before adding image links: %s", response)
+            response = uuid_images.add_uuid_images(response)
+            LOG.debug("After adding image links: %s", response)
+            return response
 
         @app.post("/loan", response_model=SuccessOrFailureResponse)
         async def create_loan_offer(

@@ -64,9 +64,15 @@ class RouterUtils:
     @staticmethod
     def sanitize_output(data):
         for item in data:
-            item['loan_status'] = item['loan_status'].value
-            item['created'] = item['created'].to_pydatetime()
-            item['offer_expiry'] = item['offer_expiry'].to_pydatetime()
+            if 'loan_status' in item:
+                item['loan_status'] = item['loan_status'].value
+
+            if 'created' in item:
+                item['created'] = item['created'].to_pydatetime()
+
+            if 'offer_expiry' in item:
+                item['offer_expiry'] = item['offer_expiry'].to_pydatetime()
+
         return data
 
 def get_config() -> None:

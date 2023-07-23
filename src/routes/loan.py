@@ -13,6 +13,7 @@ from fastapi import Depends, FastAPI
 from ipfsclient.ipfs import Ipfs
 
 import pandas as pd
+from src import uuid_images
 
 from src.schemas import LoanDetailResponse, LoanOffer, LoanResponse, SuccessOrFailureResponse
 from src.utils import RouterUtils
@@ -290,7 +291,9 @@ class LoanRouter():
                 List: List of loans.
             """
             response = loan_reader.query_for_loan_details(loan_id, recent_only=True)[0]
-            LOG.debug(response)
+            LOG.debug("Before adding image links: %s", response)
+            response = uuid_images.add_uuid_images(response)
+            LOG.debug("After adding image links: %s", response)
             return response
 
         @app.post("/loan", response_model=SuccessOrFailureResponse)

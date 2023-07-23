@@ -79,6 +79,7 @@ class RepaymentSchedule(BaseModel):
     """
     paymentId: str = Field(..., description="The unique identifier for the payment.")
     amountDue: int = Field(..., description="The amount due for the payment.")
+    imageLink: Optional[str] = Field(None, description="The IPFS link to the image associated with the loan.")
     dueDate: datetime = Field(..., description="The date and time when the payment is due.")
 
 
@@ -91,6 +92,7 @@ class Metadata(BaseModel):
     borrower: str = Field(..., description="The identifier of the borrower.")
     lender: str = Field(..., description="The identifier of the lender.")
     loan: str = Field(..., description="The identifier of the loan.")
+    loanImageLink: Optional[str] = Field(None, description="The IPFS link to the image associated with the loan.")
     created: datetime = Field(..., description="The timestamp of when the loan was created.")
 
 

@@ -1,11 +1,13 @@
 """Loan Routes."""
+import datetime
 import logging
 from typing import List, Self, Union
 
 from bizlogic.loan.reader import LoanReader
 from bizlogic.loan.repayment import PaymentSchedule
-from bizlogic.loan.status import LoanStatusType
+from bizlogic.loan.status import LoanStatusType, LoanStatus
 from bizlogic.loan.writer import LoanWriter
+from bizlogic.protoc.loan_pb2 import Loan, LoanPayment
 from bizlogic.utils import ParserType, Utils
 
 from fastapi import Depends, FastAPI
@@ -291,9 +293,38 @@ class LoanRouter():
                 List: List of loans.
             """
             response = loan_reader.query_for_loan_details(loan_id, recent_only=True)[0]
+
+            # add links to images
             LOG.debug("Before adding image links: %s", response)
             response = uuid_images.add_uuid_images(response)
             LOG.debug("After adding image links: %s", response)
+
+            # add loan status
+            LOG.debug("Before adding loan status: %s", response)
+            loan = {
+                'loan_id': response['metadata']['loan'],
+                'borrower': response['metadata']['borrower'],
+                'lender': response['metadata']['lender'],
+                'principal': int(response['principalAmount']),
+                'payments': [
+                    {
+                        'payment_id': payment['paymentId'],
+                        'payment_date': payment['dueDate'],
+                        'amount': int(payment['amountDue']),
+                    } 
+                    for payment in response['repaymentSchedule']
+                ],
+                'offer_expiry': datetime.datetime.fromisoformat(response['offerExpiry'].replace('Z', '+00:00')),
+                'created': response['metadata']['created'],
+                'accepted': response.get('accepted', False)
+            }
+
+            loan_status = LoanStatus.loan_status(loan)
+            LOG.debug("Loan status: %s", loan_status)
+
+            response['metadata']['loan_status'] = loan_status.value
+
+            LOG.debug("After adding loan status: %s", response)
             return response
 
         @app.post("/loan", response_model=SuccessOrFailureResponse)

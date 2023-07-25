@@ -50,6 +50,7 @@ class LoanStatusType(IntEnum):
     PENDING_ACCEPTANCE = 1
     EXPIRED_UNACCEPTED = 2
     ACCEPTED = 3
+    DRAFT = 4
 
     def __str__(self):
         return self.name

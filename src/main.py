@@ -41,12 +41,12 @@ async def startup_firebase() -> None:
     """Initialize firebase app."""
     # firebase auth credentials
     load_dotenv(Path(os.environ['SECRETS_PATH'] + "/.env.nanoswap"))
-    initialize_app(
-        credential=credentials.Certificate(
-            os.environ['FIREBASE_CREDENTIALS_PATH']
-        )
-    )
 
+    # Get the service account key from the local file
+    cred = credentials.Certificate(os.environ['FIREBASE_CREDENTIALS_PATH'])
+
+    # Use the service account to authenticate
+    initialize_app(cred)
 
 @app.on_event("startup")
 async def startup_feature_store() -> None:

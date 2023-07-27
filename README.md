@@ -19,3 +19,24 @@ http://127.0.0.1:8000/docs#/ or http://127.0.0.1:8000/redoc
 
 `nox --verbose`
 To only run tests: `pytest --cov=bizlogic --log-cli-level=debug`  
+
+## Gcloud Auth Issues
+
+Note, this command may be needed to fix gcloud auth issues. Both server and firebase auth emulator should be shut down when the command is run before being brought back up.
+```
+gcloud auth activate-service-account --key-file=PATH_TO_YOUR_SERVICE_ACCOUNT_JSON
+gcloud auth login
+```
+
+If that doesn't work, look for the token file (usually located at ~/.config/gcloud/application_default_credentials.json) and delete it, then try running your program again. This will force the auth library to reauthenticate and create a new token file.
+```
+rm ~/.config/gcloud/application_default_credentials.json
+gcloud auth login
+gcloud auth application-default login
+gcloud auth activate-service-account --key-file=PATH_TO_YOUR_SERVICE_ACCOUNT_JSON
+```
+
+You could also try:
+```
+cp PATH_TO_YOUR_SERVICE_ACCOUNT_JSON ~/.config/gcloud/application_default_credentials.json
+```

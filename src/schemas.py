@@ -1,8 +1,8 @@
 """Response type schemas."""
 from typing import Union, Optional, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from datetime import datetime
-from enum import Enum
+from enum import IntEnum
 
 
 class SuccessOrFailureResponse(BaseModel):
@@ -41,7 +41,7 @@ class LoanOffer(BaseModel):
     expiry: datetime = Field(..., description="The expiry date of the loan offer.")
 
 
-class LoanStatusType(Enum):
+class LoanStatusType(IntEnum):
     """
     Enum representing the status of the loan.
 
@@ -50,6 +50,10 @@ class LoanStatusType(Enum):
     PENDING_ACCEPTANCE = 1
     EXPIRED_UNACCEPTED = 2
     ACCEPTED = 3
+    DRAFT = 4
+
+    def __str__(self):
+        return self.name
 
 
 class LoanResponse(BaseModel):
@@ -68,7 +72,6 @@ class LoanResponse(BaseModel):
     transaction: Optional[str] = Field(None, description="The transaction ID associated with the loan.")
     accepted: bool = Field(..., description="A boolean value indicating whether the loan has been accepted.")
     payments: int = Field(..., description="The number of payments for the loan.")
-    loan_status: LoanStatusType = Field(..., description="The status of the loan.")
 
 
 class RepaymentSchedule(BaseModel):
@@ -94,6 +97,11 @@ class Metadata(BaseModel):
     loan: str = Field(..., description="The identifier of the loan.")
     loanImageLink: Optional[str] = Field(None, description="The IPFS link to the image associated with the loan.")
     created: datetime = Field(..., description="The timestamp of when the loan was created.")
+    loan_status: LoanStatusType = Field(..., description="The status of the loan.")
+
+    @validator('loan_status', pre=True)
+    def convert_to_enum(cls, v):
+        return LoanStatusType(v)
 
 
 class LoanDetailResponse(BaseModel):

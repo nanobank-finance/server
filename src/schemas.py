@@ -116,6 +116,10 @@ class LoanDetailResponse(BaseModel):
     metadata: Metadata = Field(..., description="The metadata associated with the loan.")
 
 
+class NanoAddressResponse(BaseModel):
+    nano_address: str
+
+
 class SumsubReviewResult(BaseModel):
     """
     Model representing the result of the KYC review.

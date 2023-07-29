@@ -5,9 +5,8 @@ from src.utils import RouterUtils
 from src.firestore import db
 from src.firestore.crud import check_locked, check_and_lock_user
 from nanohelp.wallet import WalletManager
-from nanohelp.secret_manager import SecretManager
-from bizlogic.protoc.loan_pb2 import Loan, LoanPayment
-from bizlogic.loan import LoanReader
+from nanohelp.secret import SecretManager
+from bizlogic.loan.reader import LoanReader
 from ipfsclient.ipfs import Ipfs
 
 class NanoRouter:

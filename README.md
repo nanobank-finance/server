@@ -11,8 +11,19 @@ Add environment variables to `os.environ['SECRETS_PATH'] + "/.env.nanoswap"` (se
 
  - Webserver: `uvicorn src.main:app --reload`
  - Firebase Auth Emulator: `firebase emulators:start`
- - Nano Currency RPC Node: `docker start nano_node`
  - IPFS RPC Node: `ipfs daemon --api /ip4/0.0.0.0/tcp/5001`
+ - Nano Currency RPC Node: 
+ ```bash
+ # using V25.1 here but replace with the most recent version: https://github.com/nanocurrency/nano-node/releases/
+ docker pull nanocurrency/nano-test:V25.1
+ docker run --restart=unless-stopped -d \
+  -p 17075:17075 \
+  -p 127.0.0.1:17076:17076 \
+  -p 127.0.0.1:17078:17078 \
+  -v $NODE_DIRECTORY:/root \
+  --name $NODE_NAME \
+  nanocurrency/nano-test:V25.1
+ ```
 
 ## Local API docs:
 http://127.0.0.1:8000/docs#/ or http://127.0.0.1:8000/redoc
@@ -43,3 +54,8 @@ You could also try:
 ```
 cp PATH_TO_YOUR_SERVICE_ACCOUNT_JSON ~/.config/gcloud/application_default_credentials.json
 ```
+
+## XNO Network Explorer
+
+ - Prod: https://www.nanolooker.com/
+ - Test: https://xnotest.com/

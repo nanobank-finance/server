@@ -4,12 +4,16 @@ uvicorn
 pydantic
 firebase-admin
 python-dotenv
+httpx
+tenacity
+
+# nanoswap packages
 bizlogic
 ipfsclient
 ipfskvs
 uuidtoimage
-httpx
-tenacity
+basicnanoclient
+nanohelp
 
 # for tests and linting
 nox

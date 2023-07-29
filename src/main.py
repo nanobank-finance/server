@@ -13,8 +13,9 @@ from firebase_admin import credentials, initialize_app
 import src.utils
 from src.routes.application import LoanApplicationRouter
 from src.routes.loan import LoanRouter
-from src.routes.vouch import VouchRouter
+from src.routes.nano import NanoRouter
 from src.routes.sumsub import SumsubRouter
+from src.routes.vouch import VouchRouter
 
 app = FastAPI()
 
@@ -63,6 +64,7 @@ async def startup_router() -> None:
     LoanRouter(app)
     VouchRouter(app)
     SumsubRouter(app)
+    NanoRouter(app)
 
 
 @app.on_event("startup")

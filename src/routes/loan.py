@@ -2,6 +2,7 @@
 import datetime
 import logging
 from typing import List, Self, Union
+import os
 
 from bizlogic.loan.reader import LoanReader
 from bizlogic.loan.repayment import PaymentSchedule
@@ -16,8 +17,9 @@ from ipfsclient.ipfs import Ipfs
 
 import pandas as pd
 from src import uuid_images
+from nanohelp.secret import SecretManager
 
-from src.schemas import LoanDetailResponse, LoanOffer, LoanResponse, SuccessOrFailureResponse
+from src.schemas import LoanDetailResponse, LoanOffer, LoanResponse, SuccessOrFailureResponse  # noqa: E501
 from src.utils import RouterUtils
 
 LOG = logging.getLogger(__name__)
@@ -35,6 +37,7 @@ class LoanRouter():
         """
         ipfsclient = Ipfs()
         loan_reader = LoanReader(ipfsclient)
+        secret_manager = SecretManager()
 
         @app.get(
             "/loans/open",
@@ -342,13 +345,16 @@ class LoanRouter():
                     number_of_payments=loan.payments
                 )
 
+                LOG.debug("Project: %s", os.environ.get("GCLOUD_PROJECT_ID"))
                 loan_writer = LoanWriter(
                     ipfsclient,
                     loan.borrower,
                     user,
                     int(loan.principal),
                     payment_schedule,
-                    offer_expiry=loan.expiry
+                    offer_expiry=loan.expiry,
+                    secret_manager=secret_manager,
+                    project=os.environ.get("GCLOUD_PROJECT_ID")
                 )
 
                 loan_writer.write()

@@ -7,9 +7,12 @@
 
 Add environment variables to `os.environ['SECRETS_PATH'] + "/.env.nanoswap"` (set the `SECRETS_PATH` environment variable as needed)
 
-## Start the emulator and the web app:
+## Run it locally:
 
-Run: `uvicorn src.main:app --reload`
+ - Webserver: `uvicorn src.main:app --reload`
+ - Firebase Auth Emulator: `firebase emulators:start`
+ - Nano Currency RPC Node: `docker start nano_node`
+ - IPFS RPC Node: `ipfs daemon --api /ip4/0.0.0.0/tcp/5001`
 
 ## Local API docs:
 http://127.0.0.1:8000/docs#/ or http://127.0.0.1:8000/redoc

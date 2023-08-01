@@ -115,6 +115,42 @@ class LoanRouter():
                 }
             )
 
+            LOG.debug("Results: %s", results)
+
+            return RouterUtils.sanitize_output(results.to_dict(orient="records"))
+
+        @app.get(
+            "/loans/user/self/draft",
+            response_model=List[LoanResponse]
+        )
+        async def get_my_draft_loan_offers(
+            perspective: str = "lender",
+            recent: bool = False,
+            user: str = Depends(RouterUtils.get_user_token)
+        ) -> List[LoanResponse]:
+            """Get all open loans for the user.
+
+            Args:
+                perspective (str, optional): The perspective of the user.
+                    Defaults to "borrower".
+                recent (bool, optional): If True, only return the most recent
+                    loan. Defaults to False.
+                user (str, optional): User token. Defaults to Depends(RouterUtils.get_user_token).
+
+            Returns:
+                List: List of loans.
+            """
+            assert perspective in ["lender", "borrower"]  # TODO: handle invalid request properly (and make enum instead of str?)  # noqa: E501
+
+            results = loan_reader.query_for_status(
+                LoanStatusType.DRAFT,
+                index={
+                    perspective: user
+                }
+            )
+
+            LOG.debug("Results: %s", results)
+
             return RouterUtils.sanitize_output(results.to_dict(orient="records"))
 
         @app.get(

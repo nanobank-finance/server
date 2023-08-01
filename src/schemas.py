@@ -69,9 +69,10 @@ class LoanResponse(BaseModel):
     created: datetime = Field(..., description="The time when the loan was created.")
     principal: int = Field(..., description="The principal amount of the loan.")
     offer_expiry: datetime = Field(..., description="The time when the loan offer expires.")
-    transaction: Optional[str] = Field(None, description="The transaction ID associated with the loan.")
     accepted: bool = Field(..., description="A boolean value indicating whether the loan has been accepted.")
     payments: int = Field(..., description="The number of payments for the loan.")
+    lender_deposit_wallet: str = Field(..., description="The deposit wallet address for the lender (for the principal payment).")
+    borrower_deposit_wallet: str = Field(..., description="The deposit wallet address for the borrower (for the repayment).")
 
 
 class RepaymentSchedule(BaseModel):

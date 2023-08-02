@@ -35,3 +35,50 @@ class NanoRouter:
                 )
 
             return NanoAddressResponse(nano_address=nano_address)
+
+        @app.get("/payments/borrower/completed", response_model=NanoAddressResponse)
+        async def get_borrower_payment_history(
+                borrower_deposit_address: str,
+                user: str = Depends(RouterUtils.get_user_token)) -> NanoAddressResponse:
+            """Check if the borrower has made the principal payment.
+
+            Args:
+                loan_id (str): _description_
+                user (str, optional): _description_. Defaults to Depends(RouterUtils.get_user_token).
+            """
+            # TODO
+            # loan = loan_reader.query_for_loan_details(loan_id, recent_only=True)[0]
+            # if user != loan.borrower:
+            #     raise HTTPException(
+            #         status_code=400,
+            #         detail="User must be the borrower"
+            #     )
+
+            # nano_address = loan.borrower_nano_address
+
+            # return NanoAddressResponse(nano_address=nano_address)
+            pass
+
+        @app.get("/payments/lender/completed", response_model=NanoAddressResponse)
+        async def get_lender_payment_history(
+                lender_deposit_address: str,
+                user: str = Depends(RouterUtils.get_user_token)) -> NanoAddressResponse:
+            """Check if the lender has made any repayments.
+
+            Args:
+                loan_id (str): _description_
+                user (str, optional): _description_. Defaults to Depends(RouterUtils.get_user_token).
+            """
+
+            # TODO
+            # loan = loan_reader.query_for_loan_details(loan_id, recent_only=True)[0]
+            # if user != loan.borrower:
+            #     raise HTTPException(
+            #         status_code=400,
+            #         detail="User must be the borrower"
+            #     )
+
+            # nano_address = loan.borrower_nano_address
+
+            # return NanoAddressResponse(nano_address=nano_address)
+            pass

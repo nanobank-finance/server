@@ -71,7 +71,7 @@ class VouchRouter():
 
             Args:
                 recent (bool, optional): Whether to only get recent vouches. Defaults to False.
-            
+
             Returns:
                 List: List of vouches.
             """

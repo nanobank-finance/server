@@ -2,7 +2,7 @@
 from typing import Union, Optional, List
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
-from enum import IntEnum
+from enum import Enum
 
 
 class SuccessOrFailureResponse(BaseModel):
@@ -41,7 +41,7 @@ class LoanOffer(BaseModel):
     expiry: datetime = Field(..., description="The expiry date of the loan offer.")
 
 
-class LoanStatusType(IntEnum):
+class LoanStatusType(Enum):
     """
     Enum representing the status of the loan.
 
@@ -71,6 +71,7 @@ class LoanResponse(BaseModel):
     offer_expiry: datetime = Field(..., description="The time when the loan offer expires.")
     accepted: bool = Field(..., description="A boolean value indicating whether the loan has been accepted.")
     payments: int = Field(..., description="The number of payments for the loan.")
+    loan_status: Optional[LoanStatusType] = Field(None, description="The status of the loan.")
     lender_deposit_wallet: str = Field(..., description="The deposit wallet address for the lender (for the principal payment).")
     borrower_deposit_wallet: str = Field(..., description="The deposit wallet address for the borrower (for the repayment).")
 

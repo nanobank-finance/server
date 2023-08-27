@@ -61,9 +61,9 @@ class LoanRouter():
 
             LOG.debug("Results: %s", results)
             # results = uuid_images.add_uuid_images(results)
-            # results = RouterUtils.sanitize_output(results.to_dict(orient='records'))
+            results = RouterUtils.sanitize_output(results.to_dict(orient='records')) if not results.empty else []
             LOG.debug("Final results: %s", results)
-            return results.to_dict(orient="records") if not results.empty else []
+            return results
 
         @app.get(
             "/loan",

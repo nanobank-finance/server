@@ -118,11 +118,11 @@ class LoanRouter():
             LOG.debug("After adding loan status: %s", response)
             return response
 
-        @app.post("/loan", response_model=SuccessOrFailureResponse)
+        @app.post("/loan", response_model=LoanDetailResponse)
         async def create_loan_offer(
             loan: LoanOffer,
             user: str = Depends(RouterUtils.get_user_token)
-        ) -> SuccessOrFailureResponse:
+        ) -> LoanDetailResponse:
             """Create a loan offer."""
             try:
                 payment_schedule = PaymentSchedule.create_payment_schedule(
@@ -147,9 +147,42 @@ class LoanRouter():
 
                 loan_writer.write()
 
-                return SuccessOrFailureResponse(
-                    success=True
-                )
+                # TODO: instead of writing and then reading,
+                #       just return the loan details from the writer
+
+                # Query the loan details after creating the loan offer
+                response = loan_reader.query_for_loan_details(
+                    loan_writer.loan_id, recent_only=True
+                )[0]
+                response = uuid_images.add_uuid_images(response)
+
+                loan = {
+                    'loan_id': response['metadata']['loan'],
+                    'borrower': response['metadata']['borrower'],
+                    'lender': response['metadata']['lender'],
+                    'principal': int(response['principalAmount']),
+                    'payments': [
+                        {
+                            'payment_id': payment['paymentId'],
+                            'payment_date': payment['dueDate'],
+                            'amount': int(payment['amountDue']),
+                        }
+                        for payment in response['repaymentSchedule']
+                    ],
+                    'offer_expiry': datetime.datetime.fromisoformat(
+                        response['offerExpiry'].replace('Z', '+00:00')
+                    ),
+                    'created': response['metadata']['created'],
+                    'accepted': response.get('accepted', False)
+                }
+
+                loan_status = LoanStatus.loan_status(loan)
+                LOG.debug("Loan status: %s", loan_status)
+
+                response['metadata']['loan_status'] = loan_status.value
+                LOG.debug("After adding loan status: %s", response)
+
+                return response
             except Exception as e:
                 LOG.exception(e)
                 return SuccessOrFailureResponse(

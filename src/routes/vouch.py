@@ -71,11 +71,11 @@ class VouchRouter():
 
             Args:
                 recent (bool, optional): Whether to only get recent vouches. Defaults to False.
-            
+
             Returns:
                 List: List of vouches.
             """
-            return vouch_reader.get_all_vouches().to_json(orient="records")
+            return vouch_reader.get_all_vouches().to_dict(orient="records")
 
         @app.get(
             "/vouch/user/self",
